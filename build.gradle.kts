@@ -10,28 +10,14 @@ group = "com.urosjarc"
 version = "0.0.1-SNAPSHOT"
 
 repositories {
-    maven {
-        setUrl("http://mvn.topobyte.de")
-        isAllowInsecureProtocol = true
-    }
-    maven {
-        setUrl("http://mvn.slimjars.com")
-        isAllowInsecureProtocol = true
-    }
     mavenCentral()
 }
 
 dependencies {
     val version = "0.3.1"
-    this.implementation("org.jsoup:jsoup:1.17.2")
-
-
-    this.implementation("de.topobyte:osm4j-xml:1.3.0")
-    this.implementation("de.topobyte:osm4j-pbf:1.3.0")
-    this.implementation("de.topobyte:osm4j-tbo:1.3.0")
-    this.implementation("de.topobyte:osm4j-geometry:1.3.0")
-
     this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
+
+    this.testImplementation("org.jsoup:jsoup:1.17.2")
 }
 
 testing {

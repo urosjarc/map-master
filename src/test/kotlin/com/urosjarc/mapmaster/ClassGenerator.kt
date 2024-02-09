@@ -2,12 +2,13 @@ package com.urosjarc.mapmaster
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.awt.Taskbar
 import java.io.File
 
-object TagsParser {
+object ClassGenerator {
     @JvmStatic
     fun main(args: Array<String>) {
-        val url = TagsParser::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
+        val url = ClassGenerator::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
         val doc: Document = Jsoup.parse(File(url.path))
         val classes = mutableMapOf<String, MutableSet<Pair<String, String>>>()
         for (tr in doc.select("tr")) {
@@ -28,28 +29,27 @@ object TagsParser {
         val osmFile = mutableListOf<String>()
         osmFile.add("package com.urosjarc.mapmaster.domain")
         osmFile.add("class OsmMap(")
-        osmFile.add("\tval minLat: Double,")
-        osmFile.add("\tval minLon: Double,")
-        osmFile.add("\tval maxLat: Double,")
-        osmFile.add("\tval maxLon: Double")
+        osmFile.add("\tval minLat: Float,")
+        osmFile.add("\tval minLon: Float,")
+        osmFile.add("\tval maxLat: Float,")
+        osmFile.add("\tval maxLon: Float")
         osmFile.add(") {\n")
 
         val osmFileFun = mutableListOf("")
         osmFileFun.add("\tfun addMapFeature(feature: OsmFeature){")
-        osmFileFun.add("\t\twhen(feature){")
+        osmFileFun.add("\t\tval tagKeys = feature.tags.keys")
 
         classes.forEach { t, u ->
             val className = t.replaceFirstChar(Char::uppercaseChar)
             val file = mutableListOf<String>()
             osmFile.add("\tval ${className.lowercase()} = mutableListOf<$className>()")
-            osmFileFun.add("\t\t\tis $className -> this.$t.add(feature)")
+            osmFileFun.add("\t\t\tif(tagKeys.contains(\"$t\")) this.$t.add(feature as $className)")
             file.add("package com.urosjarc.mapmaster.domain\n")
             file.add("data class $className(")
             file.add("\toverride val id: Long,")
-            file.add("\toverride val nodes: List<OsmNode>,")
-            file.add("\toverride val tags: Map<String, String>,")
-            file.add("\tval type: Type")
+            file.add("\toverride val tags: MutableMap<String, String>,")
             file.add("): OsmFeature {")
+            file.add("\tval type: Type = Type.valueOf(this.tags[\"$t\"]!!)")
             file.add("\tenum class Type(val value: String) {")
             u.forEach {
                 val enumName = it.first.uppercase()
@@ -66,7 +66,6 @@ object TagsParser {
             File("src/main/kotlin/com/urosjarc/mapmaster/domain/$className.kt").writeText(file.joinToString("\n"))
         }
 
-        osmFileFun.add("\t\t}")
         osmFileFun.add("\t}")
         osmFile.addAll(osmFileFun)
         osmFile.add("}")
