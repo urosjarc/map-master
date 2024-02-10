@@ -2,7 +2,6 @@ package com.urosjarc.mapmaster
 
 import java.nio.file.Path
 import kotlin.io.path.forEachLine
-import kotlin.io.path.readText
 
 object OsmParser {
     val map: OsmMap? = null
@@ -37,16 +36,15 @@ object OsmParser {
         val osmRelsMembers = mutableMapOf<Long, MutableList<Member>>() //Id to members
 
         //Parsing each line one by one
-        println(path.readText())
         path.forEachLine {
-            val line = it.trim()
-            val attrs = parseLine(line)
+            val line = it.trimStart()
 
             if (line.startsWith("<?xml")) {
                 state = State.NONE
             } else if (line.startsWith("<osm")) {
                 state = State.NONE
             } else if (line.startsWith("<bounds")) {
+                val attrs = parseLine(line)
                 map = OsmMap(
                     minLat = attrs["minlat"]!!.toFloat(),
                     maxLat = attrs["maxlat"]!!.toFloat(),
@@ -55,6 +53,7 @@ object OsmParser {
                 )
             } else if (line.startsWith("<node")) {
                 state = State.NODE
+                val attrs = parseLine(line)
                 curOsmNode = OsmNode(
                     id = attrs["id"]!!.toLong(),
                     lat = attrs["lat"]!!.toFloat(),
@@ -63,15 +62,18 @@ object OsmParser {
                 osmNodes[curOsmNode!!.id] = curOsmNode!!
             } else if (line.startsWith("<way")) {
                 state = State.WAY
+                val attrs = parseLine(line)
                 curOsmWay = OsmWay(id = attrs["id"]!!.toLong())
                 osmWays[curOsmWay!!.id] = curOsmWay!!
                 osmWaysRefs[curOsmWay!!.id] = mutableListOf()
             } else if (line.startsWith("<relation")) {
                 state = State.RELATION
+                val attrs = parseLine(line)
                 curOsmRel = OsmRel(id = attrs["id"]!!.toLong())
                 osmRels[curOsmRel!!.id] = curOsmRel!!
                 osmRelsMembers[curOsmRel!!.id] = mutableListOf()
             } else if (line.startsWith("<tag")) {
+                val attrs = parseLine(line)
                 val key = attrs["k"]!!
                 val value = attrs["v"]!!
                 when (state) {
@@ -81,6 +83,7 @@ object OsmParser {
                     State.RELATION -> curOsmRel!!.tags[key] = value
                 }
             } else if (line.startsWith("<nd")) {
+                val attrs = parseLine(line)
                 when (state) {
                     State.NONE -> throw Exception(it)
                     State.NODE -> throw Exception(it)
@@ -88,6 +91,7 @@ object OsmParser {
                     State.RELATION -> throw Exception(it)
                 }
             } else if (line.startsWith("<member")) {
+                val attrs = parseLine(line)
                 val member = Member(
                     ref = attrs["ref"]!!.toLong(),
                     role = attrs["role"]!!,
@@ -140,15 +144,17 @@ object OsmParser {
     }
 
     fun parseLine(line: String): Map<String, String> {
-        return line
-            .replace("/>", "")
-            .replace(">", "")
+        val matrix = line
             .split(" ", limit = 2)
             .last()
             .split("\" ")
-            .filter { it.contains("=") }
             .map {
-                it.replace("\"", "").split("=")
-            }.map { it.first() to it.last() }.toMap()
+                val (key, value) = it.split("=\"", limit = 2)
+                key to value
+            }.toMutableList()
+
+        val lastPair = matrix[matrix.size-1]
+        matrix[matrix.size-1] = (lastPair.first to lastPair.second.split("\"").first())
+        return matrix.toMap()
     }
 }
