@@ -1,6 +1,6 @@
 package com.urosjarc.mapmaster
 
-class OsmRel(
+data class OsmRel(
     override val id: Long,
     override val tags: MutableMap<String, String> = mutableMapOf(),
     val nodes: MutableList<OsmMember<OsmNode>> = mutableListOf(),

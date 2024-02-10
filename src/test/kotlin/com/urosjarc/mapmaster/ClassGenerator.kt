@@ -25,8 +25,8 @@ object ClassGenerator {
             }
         }
 
-        this.createFeatures(classes = classes)
-        this.createOsmMap(classes = classes)
+        createFeatures(classes = classes)
+        createOsmFeatures(classes = classes)
     }
 
     fun className(feature: String): String = feature
@@ -36,7 +36,7 @@ object ClassGenerator {
 
     fun createFeatures(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
         classes.forEach { feature, u ->
-            val className = this.className(feature = feature)
+            val className = className(feature = feature)
             val enums = mutableListOf<String>()
 
             u.forEach {
@@ -106,31 +106,35 @@ object ClassGenerator {
         }
     }
 
-    fun createOsmMap(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
+    fun createOsmFeatures(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
 
         val attr = mutableListOf<String>()
         val ifs = mutableListOf<String>()
 
         classes.forEach { feature, u ->
-            val className = this.className(feature = feature)
+            val className = className(feature = feature)
             attr.add("val $feature = ${className}Features()")
-            ifs.add("""if (tagKeys.contains("$feature")) { this.$feature.add(feature); inserted = true }""")
+            ifs.add("""
+                if (tagKeys.contains("$feature")) {
+                    this.all.getOrPut("$feature") { mutableListOf() }.add(feature)
+                    this.$feature.add(feature)
+                    inserted = true;
+                }
+            """.trimIndent())
         }
 
         val text = "\t\t" + """
         package com.urosjarc.mapmaster
+        
         import com.urosjarc.mapmaster.features.*
+        
         /**
          * This file is auto generated!
          */
          
-
-        data class OsmMap(
-            val minLat: Float,
-            val minLon: Float,
-            val maxLat: Float,
-            val maxLon: Float
-        ) {
+        class OsmFeatures {
+            
+            val all = mutableMapOf<String, MutableList<OsmFeature>>()
 
             ${attr.joinToString("\n\t\t\t")}
 
@@ -143,7 +147,7 @@ object ClassGenerator {
         }
         """.trimIndent()
 
-        File("src/main/kotlin/com/urosjarc/mapmaster/OsmMap.kt")
+        File("src/main/kotlin/com/urosjarc/mapmaster/OsmFeatures.kt")
             .writeText(text)
     }
 }

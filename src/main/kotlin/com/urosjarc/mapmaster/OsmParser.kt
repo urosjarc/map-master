@@ -2,6 +2,7 @@ package com.urosjarc.mapmaster
 
 import java.nio.file.Path
 import kotlin.io.path.forEachLine
+import kotlin.io.path.readText
 
 object OsmParser {
     val map: OsmMap? = null
@@ -36,6 +37,7 @@ object OsmParser {
         val osmRelsMembers = mutableMapOf<Long, MutableList<Member>>() //Id to members
 
         //Parsing each line one by one
+        println(path.readText())
         path.forEachLine {
             val line = it.trim()
             val attrs = parseLine(line)
@@ -111,14 +113,14 @@ object OsmParser {
 
         //Connecting nodes
         osmNodes.forEach { _, node ->
-            map!!.add(feature = OsmFeature(obj = node, objType = OsmFeature.Type.NODE))
+            map!!.features.add(feature = OsmFeature(obj = node, objType = OsmFeature.Type.NODE))
         }
 
         //Connecting ways
         osmWaysRefs.forEach { wayId, nodesIds ->
             val way = osmWays[wayId]!!
             nodesIds.forEach { nodeId -> way.nodes.add(osmNodes[nodeId]!!) }
-            map!!.add(feature = OsmFeature(obj = way, objType = OsmFeature.Type.WAY))
+            map!!.features.add(feature = OsmFeature(obj = way, objType = OsmFeature.Type.WAY))
         }
 
         //Connecting relations
@@ -131,7 +133,7 @@ object OsmParser {
                     OsmFeature.Type.RELATIONSHIP -> osmRels[it.ref]?.let { rel.rels.add(OsmMember(obj = it, role = role)) }
                 }
             }
-            map!!.add(feature = OsmFeature(obj = rel, objType = OsmFeature.Type.RELATIONSHIP))
+            map!!.features.add(feature = OsmFeature(obj = rel, objType = OsmFeature.Type.RELATIONSHIP))
         }
 
         return map!!
@@ -141,7 +143,9 @@ object OsmParser {
         return line
             .replace("/>", "")
             .replace(">", "")
-            .split(" ")
+            .split(" ", limit = 2)
+            .last()
+            .split("\" ")
             .filter { it.contains("=") }
             .map {
                 it.replace("\"", "").split("=")
