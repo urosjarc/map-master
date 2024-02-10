@@ -1,6 +1,6 @@
-package com.urosjarc.mapmaster.domain
+package com.urosjarc.mapmaster
 
-open class OsmFeature(
+data class OsmFeature(
     val obj: OsmObj,
     val objType: Type
 ) {

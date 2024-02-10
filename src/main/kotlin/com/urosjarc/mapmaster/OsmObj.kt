@@ -1,4 +1,4 @@
-package com.urosjarc.mapmaster.domain
+package com.urosjarc.mapmaster
 
 interface OsmObj {
     val id: Long
