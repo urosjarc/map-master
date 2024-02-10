@@ -1,8 +1,9 @@
 package com.urosjarc.mapmaster.domain
 
-data class OsmNode(
+class OsmNode(
     override val id: Long,
-    override val tags: MutableMap<String, String> = mutableMapOf(),
+    override val tags: MutableMap<String, String>,
+
     val lat: Float,
     val lon: Float,
-) : OsmFeature
+) : OsmObj

@@ -2,7 +2,6 @@ package com.urosjarc.mapmaster
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import java.awt.Taskbar
 import java.io.File
 
 object ClassGenerator {
@@ -26,31 +25,20 @@ object ClassGenerator {
             }
         }
 
-        val osmFile = mutableListOf<String>()
-        osmFile.add("package com.urosjarc.mapmaster.domain")
-        osmFile.add("class OsmMap(")
-        osmFile.add("\tval minLat: Float,")
-        osmFile.add("\tval minLon: Float,")
-        osmFile.add("\tval maxLat: Float,")
-        osmFile.add("\tval maxLon: Float")
-        osmFile.add(") {\n")
+        this.createFeatures(classes = classes)
+        this.createOsmMap(classes = classes)
+    }
 
-        val osmFileFun = mutableListOf("")
-        osmFileFun.add("\tfun addMapFeature(feature: OsmFeature){")
-        osmFileFun.add("\t\tval tagKeys = feature.tags.keys")
+    fun className(feature: String): String = feature
+        .split("_")
+        .map { it.replaceFirstChar(Char::uppercaseChar) }
+        .joinToString("")
 
-        classes.forEach { t, u ->
-            val className = t.replaceFirstChar(Char::uppercaseChar)
-            val file = mutableListOf<String>()
-            osmFile.add("\tval ${className.lowercase()} = mutableListOf<$className>()")
-            osmFileFun.add("\t\t\tif(tagKeys.contains(\"$t\")) this.$t.add(feature as $className)")
-            file.add("package com.urosjarc.mapmaster.domain\n")
-            file.add("data class $className(")
-            file.add("\toverride val id: Long,")
-            file.add("\toverride val tags: MutableMap<String, String>,")
-            file.add("): OsmFeature {")
-            file.add("\tval type: Type = Type.valueOf(this.tags[\"$t\"]!!)")
-            file.add("\tenum class Type(val value: String) {")
+    fun createFeatures(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
+        classes.forEach { feature, u ->
+            val className = this.className(feature = feature)
+            val enums = mutableListOf<String>()
+
             u.forEach {
                 val enumName = it.first.uppercase()
                     .replace("-", "_")
@@ -58,18 +46,100 @@ object ClassGenerator {
                     .replace("10", "TEN_")
                 var enumDesc = it.second.replace("\n", "")
                 if (enumDesc.isNotBlank()) enumDesc = "// " + enumDesc
-                file.add("\t\t%-35s %s".format("$enumName(\"${it.first}\"),", enumDesc))
+                enums.add("%-35s %s".format("$enumName(\"${it.first}\"),", enumDesc))
             }
-            file.add("\t}")
-            file.add("}")
 
-            File("src/main/kotlin/com/urosjarc/mapmaster/domain/$className.kt").writeText(file.joinToString("\n"))
+            val text = "\t\t\t" + """package com.urosjarc.mapmaster.domain
+            
+            /**
+             * This file is auto generated!
+             */
+
+            class ${className}Node(
+                val node: OsmNode,
+                val type: ${className}Type
+            )
+
+            class ${className}Way(
+                val way: OsmWay,
+                val type: ${className}Type
+            )
+
+            class ${className}Rel(
+                val rel: OsmRel,
+                val type: ${className}Type
+            )
+
+            class ${className}Features(
+                val nodes: MutableList<${className}Node> = mutableListOf(),
+                val ways: MutableList<${className}Way> = mutableListOf(),
+                val rels: MutableList<${className}Rel> = mutableListOf()
+            ) {
+                fun add(feature: OsmFeature) {
+                    val type = ${className}Type.valueOf(feature.obj.tags["$feature"]!!)
+                    when (feature.objType) {
+
+                        OsmFeature.Type.NODE ->
+                            this.nodes.add(${className}Node(node = feature.obj as OsmNode, type = type))
+
+                        OsmFeature.Type.RELATIONSHIP ->
+                            this.rels.add(${className}Rel(rel = feature.obj as OsmRel, type = type))
+
+                        OsmFeature.Type.WAY ->
+                            this.ways.add(${className}Way(way = feature.obj as OsmWay, type = type))
+
+                    }
+                }
+            }
+
+            enum class ${className}Type(val value: String) {
+                ${enums.joinToString("\n\t\t\t\t")}
+            }
+            """.trimIndent()
+
+            File("src/main/kotlin/com/urosjarc/mapmaster/domain/$className.kt")
+                .writeText(text)
+        }
+    }
+
+
+    fun createOsmMap(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
+
+        val attr = mutableListOf<String>()
+        val ifs = mutableListOf<String>()
+
+        classes.forEach { feature, u ->
+            val className = this.className(feature = feature)
+            attr.add("val $feature = ${className}Features()")
+            ifs.add("""if (tagKeys.contains("$feature")) this.$feature.add(feature)""")
         }
 
-        osmFileFun.add("\t}")
-        osmFile.addAll(osmFileFun)
-        osmFile.add("}")
+        val text = "\t\t" + """
+        package com.urosjarc.mapmaster.domain
+        
+        /**
+         * This file is auto generated!
+         */
 
-        File("src/main/kotlin/com/urosjarc/mapmaster/domain/OsmMap.kt").writeText(osmFile.joinToString("\n"))
+        class OsmMap(
+            val minLat: Float,
+            val minLon: Float,
+            val maxLat: Float,
+            val maxLon: Float
+        ) {
+
+            ${attr.joinToString("\n\t\t\t")}
+
+            fun add(feature: OsmFeature) {
+                val tagKeys = feature.obj.tags.keys
+                ${ifs.joinToString("\n\t\t\t\t")}
+                else throw Exception(feature.toString())
+            }
+        }
+        """.trimIndent()
+
+        File("src/main/kotlin/com/urosjarc/mapmaster/domain/OsmMap.kt")
+            .writeText(text)
     }
+
 }
