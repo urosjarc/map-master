@@ -1,0 +1,7 @@
+<bounds minlat="1" minlon="2" maxlat="3" maxlon="4"/>
+ <node id="1" lat="10" lon="11"/>
+ <node id="2" lat="20" lon="21">
+  <tag k="highway" v="traffic_signals"/>
+  <tag k="traffic_signals" v="traffic_lights"/>
+  <tag k="traffic_signals:direction" v="backward"/>
+ </node>

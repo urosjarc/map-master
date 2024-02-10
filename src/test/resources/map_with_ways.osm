@@ -1,0 +1,32 @@
+<bounds minlat="1" minlon="2" maxlat="3" maxlon="4"/>
+ <node id="1" lat="10" lon="11"/>
+ <node id="2" lat="20" lon="21">
+  <tag k="highway" v="traffic_signals"/>
+  <tag k="traffic_signals" v="traffic_lights"/>
+  <tag k="traffic_signals:direction" v="backward"/>
+ </node>
+ <way id="4698069" visible="true" version="11" changeset="61883407" timestamp="2018-08-22T10:42:02Z" user="cepesko" uid="577936">
+  <nd ref="1"/>
+  <nd ref="2"/>
+  <tag k="highway" v="residential"/>
+  <tag k="name" v="Mivka"/>
+ </way>
+ <way id="4698189" visible="true" version="30" changeset="129005749" timestamp="2022-11-16T18:40:19Z" user="martianfreeloader" uid="6508041">
+  <nd ref="1"/>
+  <nd ref="2"/>
+  <tag k="bicycle" v="use_sidepath"/>
+  <tag k="foot" v="use_sidepath"/>
+  <tag k="highway" v="primary"/>
+  <tag k="lanes" v="3"/>
+  <tag k="lit" v="yes"/>
+  <tag k="maxspeed" v="60"/>
+  <tag k="name" v="Barjanska cesta"/>
+  <tag k="oneway" v="yes"/>
+  <tag k="placement" v="left_of:2"/>
+  <tag k="shoulder" v="no"/>
+  <tag k="sidewalk" v="separate"/>
+  <tag k="smoothness" v="excellent"/>
+  <tag k="source:maxspeed" v="sign"/>
+  <tag k="surface" v="asphalt"/>
+  <tag k="turn:lanes" v="left|through|right"/>
+ </way>
