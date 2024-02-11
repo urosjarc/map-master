@@ -4,10 +4,10 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 
-object ClassGenerator {
+object CodeGenerator {
     @JvmStatic
     fun main(args: Array<String>) {
-        val url = ClassGenerator::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
+        val url = CodeGenerator::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
         val doc: Document = Jsoup.parse(File(url.path))
         val classes = mutableMapOf<String, MutableSet<Pair<String, String>>>()
         for (tr in doc.select("tr")) {
@@ -106,48 +106,38 @@ object ClassGenerator {
         }
     }
 
+    private fun autoGenerate(name: String, content: String) = """// Autogenerate start: $name$content// Autogenerate end: $name"""
+
     fun createOsmFeatures(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
 
-        val attr = mutableListOf<String>()
-        val ifs = mutableListOf<String>()
+        val features = mutableListOf<String>()
+        val add = mutableListOf<String>()
 
         classes.forEach { feature, u ->
             val className = className(feature = feature)
-            attr.add("val $feature = ${className}Features()")
-            ifs.add("""
+            features.add("val $feature = ${className}Features()")
+            add.add(
+                """
                 if (tagKeys.contains("$feature")) {
-                    this.all.getOrPut("$feature") { mutableListOf() }.add(feature)
+                    this.all.getOrPut("$feature", ::mutableListOf).add(feature)
                     this.$feature.add(feature)
                     inserted = true;
                 }
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
 
-        val text = "\t\t" + """
-        package com.urosjarc.mapmaster
-        
-        import com.urosjarc.mapmaster.features.*
-        
-        /**
-         * This file is auto generated!
-         */
-         
-        class OsmFeatures {
-            
-            val all = mutableMapOf<String, MutableList<OsmFeature>>()
+        val featuresText = features.joinToString("\n")
+        val addText = add.joinToString("\n")
 
-            ${attr.joinToString("\n\t\t\t")}
+        val featuresRgx = Regex(this.autoGenerate(name = "features", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
+        val addRgx = Regex(this.autoGenerate(name = "add", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
 
-            fun add(feature: OsmFeature): Boolean {
-                val tagKeys = feature.obj.tags.keys
-                var inserted = false
-                ${ifs.joinToString("\n\t\t\t\t")}
-                return inserted
-            }
+        File("src/main/kotlin/com/urosjarc/mapmaster/OsmFeatures.kt").also {
+            val text = it.readText()
+                .replace(featuresRgx, this.autoGenerate(name = "features", content = "\n$featuresText\n"))
+                .replace(addRgx, this.autoGenerate(name = "add", content = "\n$addText\n"))
+            it.writeText(text)
         }
-        """.trimIndent()
-
-        File("src/main/kotlin/com/urosjarc/mapmaster/OsmFeatures.kt")
-            .writeText(text)
     }
 }

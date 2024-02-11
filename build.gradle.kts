@@ -15,6 +15,7 @@ repositories {
 
 dependencies {
     val version = "0.3.1"
+    this.implementation("me.xdrop:fuzzywuzzy:1.4.0")
     this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
 
     this.testImplementation("org.jsoup:jsoup:1.17.2")

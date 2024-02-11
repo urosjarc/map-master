@@ -15,9 +15,6 @@ object OsmParser {
     )
 
     fun parse(path: Path): OsmMap {
-        //Parsing state
-        var state = State.NONE
-
         //Map data
         var map: OsmMap? = null
 
@@ -35,7 +32,10 @@ object OsmParser {
         val osmRels = mutableMapOf<Long, OsmRel>() //Id to rel
         val osmRelsMembers = mutableMapOf<Long, MutableList<Member>>() //Id to members
 
-        //Parsing each line one by one
+        //Current state of parsing
+        var state = State.NONE
+
+        //Now parse line by line
         path.forEachLine {
             val line = it.trimStart()
 
@@ -44,7 +44,7 @@ object OsmParser {
             } else if (line.startsWith("<osm")) {
                 state = State.NONE
             } else if (line.startsWith("<bounds")) {
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 map = OsmMap(
                     minLat = attrs["minlat"]!!.toFloat(),
                     maxLat = attrs["maxlat"]!!.toFloat(),
@@ -53,27 +53,29 @@ object OsmParser {
                 )
             } else if (line.startsWith("<node")) {
                 state = State.NODE
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 curOsmNode = OsmNode(
                     id = attrs["id"]!!.toLong(),
-                    lat = attrs["lat"]!!.toFloat(),
-                    lon = attrs["lon"]!!.toFloat(),
+                    position = OsmPosition(
+                        lat = attrs["lat"]!!.toFloat(),
+                        lon = attrs["lon"]!!.toFloat(),
+                    ),
                 )
                 osmNodes[curOsmNode!!.id] = curOsmNode!!
             } else if (line.startsWith("<way")) {
                 state = State.WAY
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 curOsmWay = OsmWay(id = attrs["id"]!!.toLong())
                 osmWays[curOsmWay!!.id] = curOsmWay!!
                 osmWaysRefs[curOsmWay!!.id] = mutableListOf()
             } else if (line.startsWith("<relation")) {
                 state = State.RELATION
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 curOsmRel = OsmRel(id = attrs["id"]!!.toLong())
                 osmRels[curOsmRel!!.id] = curOsmRel!!
                 osmRelsMembers[curOsmRel!!.id] = mutableListOf()
             } else if (line.startsWith("<tag")) {
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 val key = attrs["k"]!!
                 val value = attrs["v"]!!
                 when (state) {
@@ -83,7 +85,7 @@ object OsmParser {
                     State.RELATION -> curOsmRel!!.tags[key] = value
                 }
             } else if (line.startsWith("<nd")) {
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 when (state) {
                     State.NONE -> throw Exception(it)
                     State.NODE -> throw Exception(it)
@@ -91,7 +93,7 @@ object OsmParser {
                     State.RELATION -> throw Exception(it)
                 }
             } else if (line.startsWith("<member")) {
-                val attrs = parseLine(line)
+                val attrs = parseAttributes(line)
                 val member = Member(
                     ref = attrs["ref"]!!.toLong(),
                     role = attrs["role"]!!,
@@ -143,8 +145,8 @@ object OsmParser {
         return map!!
     }
 
-    fun parseLine(line: String): Map<String, String> {
-        val matrix = line
+    fun parseAttributes(xml: String): Map<String, String> {
+        val matrix = xml
             .split(" ", limit = 2)
             .last()
             .split("\" ")
@@ -153,8 +155,8 @@ object OsmParser {
                 key to value
             }.toMutableList()
 
-        val lastPair = matrix[matrix.size-1]
-        matrix[matrix.size-1] = (lastPair.first to lastPair.second.split("\"").first())
+        val lastPair = matrix[matrix.size - 1]
+        matrix[matrix.size - 1] = (lastPair.first to lastPair.second.split("\"").first())
         return matrix.toMap()
     }
 }

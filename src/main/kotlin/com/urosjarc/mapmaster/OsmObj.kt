@@ -1,6 +1,9 @@
 package com.urosjarc.mapmaster
 
-interface OsmObj {
-    val id: Long
-    val tags: MutableMap<String, String>
+abstract class OsmObj(
+    open val id: Long,
+    open val tags: MutableMap<String, String>
+) {
+    fun street(): String? = this.tags["addr:street"]
+    fun houseNumber(): String? = this.tags["addr:housenumber"]
 }

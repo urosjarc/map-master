@@ -6,4 +6,4 @@ data class OsmRel(
     val nodes: MutableList<OsmMember<OsmNode>> = mutableListOf(),
     val ways: MutableList<OsmMember<OsmWay>> = mutableListOf(),
     val rels: MutableList<OsmMember<OsmRel>> = mutableListOf(),
-) : OsmObj
+) : OsmObj(id = id, tags = tags)

@@ -67,7 +67,7 @@ class Test_OsmParser {
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
-                        lat = 20f, lon = 21f
+                        position = OsmPosition(lat = 20f, lon = 21f),
                     ),
                     type = HighwayType.TRAFFIC_SIGNALS
                 )
@@ -112,14 +112,14 @@ class Test_OsmParser {
                     "turn:lanes" to "left|through|right"
                 ),
                 nodes = mutableListOf(
-                    OsmNode(id = 1, lat = 10f, lon = 11f),
+                    OsmNode(id = 1, position = OsmPosition(lat = 10f, lon = 11f)),
                     OsmNode(
                         id = 2, tags = mutableMapOf(
                             "highway" to "traffic_signals",
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
-                        lat = 20f, lon = 21f
+                        position = OsmPosition(lat = 20f, lon = 21f),
                     )
                 )
             )
@@ -151,7 +151,7 @@ class Test_OsmParser {
                             "type" to "multipolygon"
                         ),
                         nodes = mutableListOf(
-                            OsmMember(obj = OsmNode(id = 1, lat = 10f, lon = 11f), role = "inner")
+                            OsmMember(obj = OsmNode(id = 1, position = OsmPosition(lat = 10f, lon = 11f)), role = "inner")
                         ),
                         ways = mutableListOf(
                             OsmMember(
@@ -163,10 +163,13 @@ class Test_OsmParser {
                                         "name" to "Mivka",
                                     ),
                                     nodes = mutableListOf(
-                                        OsmNode(id = 1, lat = 10f, lon = 11f),
+                                        OsmNode(id = 1, position = OsmPosition(lat = 10f, lon = 11f)),
                                         OsmNode(
-                                            id = 2, lat = 20f,
-                                            lon = 21f,
+                                            id = 2,
+                                            position = OsmPosition(
+                                                lat = 20f,
+                                                lon = 21f,
+                                            ),
                                             tags = mutableMapOf(
                                                 "highway" to "traffic_signals",
                                                 "traffic_signals" to "traffic_lights",
