@@ -1,7 +1,7 @@
 package com.urosjarc.mapmaster
 
+import com.urosjarc.mapmaster.domain.*
 import com.urosjarc.mapmaster.features.*
-import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -10,11 +10,11 @@ class Test_OsmParser {
     @Test
     fun `test full map`() {
         val url = Test_OsmParser::class.java.getResource("/Slovenija_Ljubljana_Trnovo.osm")!!
-        val map = OsmParser.parse(Path(url.path))
-        assertEquals(expected = 46.0369400f, actual = map.minLat)
-        assertEquals(expected = 14.4979900f, actual = map.minLon)
-        assertEquals(expected = 46.0462700f, actual = map.maxLat)
-        assertEquals(expected = 14.5156100f, actual = map.maxLon)
+        val map = OsmParser.parse(url.path)
+        assertEquals(expected = 46.0369400, actual = map.minLat)
+        assertEquals(expected = 14.4979900, actual = map.minLon)
+        assertEquals(expected = 46.0462700, actual = map.maxLat)
+        assertEquals(expected = 14.5156100, actual = map.maxLon)
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(
             actual = mapSize,
@@ -38,11 +38,11 @@ class Test_OsmParser {
     @Test
     fun `test empty map`() {
         val url = Test_OsmParser::class.java.getResource("/empty_map.osm")!!
-        val map = OsmParser.parse(Path(url.path))
-        assertEquals(expected = 46.0369400f, actual = map.minLat)
-        assertEquals(expected = 14.4979900f, actual = map.minLon)
-        assertEquals(expected = 46.0462700f, actual = map.maxLat)
-        assertEquals(expected = 14.5156100f, actual = map.maxLon)
+        val map = OsmParser.parse(url.path)
+        assertEquals(expected = 46.0369400, actual = map.minLat)
+        assertEquals(expected = 14.4979900, actual = map.minLon)
+        assertEquals(expected = 46.0462700, actual = map.maxLat)
+        assertEquals(expected = 14.5156100, actual = map.maxLon)
 
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(actual = mapSize, expected = mapOf())
@@ -51,11 +51,11 @@ class Test_OsmParser {
     @Test
     fun `test map with nodes`() {
         val url = Test_OsmParser::class.java.getResource("/map_with_nodes.osm")!!
-        val map = OsmParser.parse(Path(url.path))
-        assertEquals(expected = 1f, actual = map.minLat)
-        assertEquals(expected = 2f, actual = map.minLon)
-        assertEquals(expected = 3f, actual = map.maxLat)
-        assertEquals(expected = 4f, actual = map.maxLon)
+        val map = OsmParser.parse(url.path)
+        assertEquals(expected = 1.0, actual = map.minLat)
+        assertEquals(expected = 2.0, actual = map.minLon)
+        assertEquals(expected = 3.0, actual = map.maxLat)
+        assertEquals(expected = 4.0, actual = map.maxLon)
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(actual = mapSize, expected = mapOf("highway" to 1))
         assertEquals(
@@ -67,7 +67,7 @@ class Test_OsmParser {
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
-                        position = OsmPosition(lat = 20f, lon = 21f),
+                        position = MapPosition(lat = 20.0, lon = 21.0),
                     ),
                     type = HighwayType.TRAFFIC_SIGNALS
                 )
@@ -78,11 +78,11 @@ class Test_OsmParser {
     @Test
     fun `test map with ways`() {
         val url = Test_OsmParser::class.java.getResource("/map_with_ways.osm")!!
-        val map = OsmParser.parse(Path(url.path))
-        assertEquals(expected = 1f, actual = map.minLat)
-        assertEquals(expected = 2f, actual = map.minLon)
-        assertEquals(expected = 3f, actual = map.maxLat)
-        assertEquals(expected = 4f, actual = map.maxLon)
+        val map = OsmParser.parse(url.path)
+        assertEquals(expected = 1.0, actual = map.minLat)
+        assertEquals(expected = 2.0, actual = map.minLon)
+        assertEquals(expected = 3.0, actual = map.maxLat)
+        assertEquals(expected = 4.0, actual = map.maxLon)
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(actual = mapSize, expected = mapOf("highway" to 3, "maxspeed" to 1))
         assertEquals(actual = map.features.highway.nodes.size, expected = 1)
@@ -112,14 +112,14 @@ class Test_OsmParser {
                     "turn:lanes" to "left|through|right"
                 ),
                 nodes = mutableListOf(
-                    OsmNode(id = 1, position = OsmPosition(lat = 10f, lon = 11f)),
+                    OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)),
                     OsmNode(
                         id = 2, tags = mutableMapOf(
                             "highway" to "traffic_signals",
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
-                        position = OsmPosition(lat = 20f, lon = 21f),
+                        position = MapPosition(lat = 20.0, lon = 21.0),
                     )
                 )
             )
@@ -131,11 +131,11 @@ class Test_OsmParser {
     @Test
     fun `test map with rels`() {
         val url = Test_OsmParser::class.java.getResource("/map_with_rels.osm")!!
-        val map = OsmParser.parse(Path(url.path))
-        assertEquals(expected = 1f, actual = map.minLat)
-        assertEquals(expected = 2f, actual = map.minLon)
-        assertEquals(expected = 3f, actual = map.maxLat)
-        assertEquals(expected = 4f, actual = map.maxLon)
+        val map = OsmParser.parse(url.path)
+        assertEquals(expected = 1.0, actual = map.minLat)
+        assertEquals(expected = 2.0, actual = map.minLon)
+        assertEquals(expected = 3.0, actual = map.maxLat)
+        assertEquals(expected = 4.0, actual = map.maxLon)
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(actual = mapSize, expected = mapOf("highway" to 2, "building" to 1))
         assertEquals(
@@ -151,7 +151,7 @@ class Test_OsmParser {
                             "type" to "multipolygon"
                         ),
                         nodes = mutableListOf(
-                            OsmMember(obj = OsmNode(id = 1, position = OsmPosition(lat = 10f, lon = 11f)), role = "inner")
+                            OsmMember(obj = OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), role = "inner")
                         ),
                         ways = mutableListOf(
                             OsmMember(
@@ -163,12 +163,12 @@ class Test_OsmParser {
                                         "name" to "Mivka",
                                     ),
                                     nodes = mutableListOf(
-                                        OsmNode(id = 1, position = OsmPosition(lat = 10f, lon = 11f)),
+                                        OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)),
                                         OsmNode(
                                             id = 2,
-                                            position = OsmPosition(
-                                                lat = 20f,
-                                                lon = 21f,
+                                            position = MapPosition(
+                                                lat = 20.0,
+                                                lon = 21.0,
                                             ),
                                             tags = mutableMapOf(
                                                 "highway" to "traffic_signals",

@@ -1,4 +1,4 @@
-package com.urosjarc.mapmaster
+package com.urosjarc.mapmaster.domain
 
 data class OsmWay(
     override val id: Long,

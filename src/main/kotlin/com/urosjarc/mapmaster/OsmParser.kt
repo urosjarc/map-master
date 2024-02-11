@@ -1,20 +1,38 @@
 package com.urosjarc.mapmaster
 
-import java.nio.file.Path
+import SrtmMap
+import com.urosjarc.mapmaster.domain.*
+import kotlin.io.path.Path
 import kotlin.io.path.forEachLine
 
 object OsmParser {
-    val map: OsmMap? = null
-
     private enum class State { NONE, NODE, WAY, RELATION }
 
-    data class Member(
+    private data class Member(
         val ref: Long,
         val role: String,
         val type: OsmFeature.Type,
     )
 
-    fun parse(path: Path): OsmMap {
+    fun parseAttributes(xml: String): Map<String, String> {
+        val matrix = xml
+            .split(" ", limit = 2)
+            .last()
+            .split("\" ")
+            .map {
+                val (key, value) = it.split("=\"", limit = 2)
+                key to value
+            }.toMutableList()
+
+        val lastPair = matrix[matrix.size - 1]
+        matrix[matrix.size - 1] = (lastPair.first to lastPair.second.split("\"").first())
+        return matrix.toMap()
+    }
+
+    fun parse(path: String, srtmMaps: List<SrtmMap> = listOf()): OsmMap {
+        //Srtm maps
+        val position_to_srtmMap = srtmMaps.associateBy { it.lat to it.lon }
+
         //Map data
         var map: OsmMap? = null
 
@@ -36,7 +54,7 @@ object OsmParser {
         var state = State.NONE
 
         //Now parse line by line
-        path.forEachLine {
+        Path(path).forEachLine {
             val line = it.trimStart()
 
             if (line.startsWith("<?xml")) {
@@ -46,20 +64,23 @@ object OsmParser {
             } else if (line.startsWith("<bounds")) {
                 val attrs = parseAttributes(line)
                 map = OsmMap(
-                    minLat = attrs["minlat"]!!.toFloat(),
-                    maxLat = attrs["maxlat"]!!.toFloat(),
-                    minLon = attrs["minlon"]!!.toFloat(),
-                    maxLon = attrs["maxlon"]!!.toFloat()
+                    minLat = attrs["minlat"]!!.toDouble(),
+                    maxLat = attrs["maxlat"]!!.toDouble(),
+                    minLon = attrs["minlon"]!!.toDouble(),
+                    maxLon = attrs["maxlon"]!!.toDouble()
                 )
             } else if (line.startsWith("<node")) {
                 state = State.NODE
                 val attrs = parseAttributes(line)
+                val pos = MapPosition(
+                    lat = attrs["lat"]!!.toDouble(),
+                    lon = attrs["lon"]!!.toDouble(),
+                )
+                val elevation = position_to_srtmMap[pos.lat.toInt() to pos.lon.toInt()]?.elevation(pos)
                 curOsmNode = OsmNode(
                     id = attrs["id"]!!.toLong(),
-                    position = OsmPosition(
-                        lat = attrs["lat"]!!.toFloat(),
-                        lon = attrs["lon"]!!.toFloat(),
-                    ),
+                    elevation = elevation,
+                    position = pos
                 )
                 osmNodes[curOsmNode!!.id] = curOsmNode!!
             } else if (line.startsWith("<way")) {
@@ -143,20 +164,5 @@ object OsmParser {
         }
 
         return map!!
-    }
-
-    fun parseAttributes(xml: String): Map<String, String> {
-        val matrix = xml
-            .split(" ", limit = 2)
-            .last()
-            .split("\" ")
-            .map {
-                val (key, value) = it.split("=\"", limit = 2)
-                key to value
-            }.toMutableList()
-
-        val lastPair = matrix[matrix.size - 1]
-        matrix[matrix.size - 1] = (lastPair.first to lastPair.second.split("\"").first())
-        return matrix.toMap()
     }
 }

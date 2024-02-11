@@ -1,9 +1,9 @@
 package com.urosjarc.mapmaster.features
 
-import com.urosjarc.mapmaster.OsmFeature
-import com.urosjarc.mapmaster.OsmNode
-import com.urosjarc.mapmaster.OsmRel
-import com.urosjarc.mapmaster.OsmWay
+import com.urosjarc.mapmaster.domain.OsmFeature
+import com.urosjarc.mapmaster.domain.OsmNode
+import com.urosjarc.mapmaster.domain.OsmRel
+import com.urosjarc.mapmaster.domain.OsmWay
 
 /**
  * This file is auto generated!

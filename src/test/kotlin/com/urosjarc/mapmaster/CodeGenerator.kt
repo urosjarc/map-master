@@ -133,7 +133,7 @@ object CodeGenerator {
         val featuresRgx = Regex(this.autoGenerate(name = "features", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
         val addRgx = Regex(this.autoGenerate(name = "add", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
 
-        File("src/main/kotlin/com/urosjarc/mapmaster/OsmFeatures.kt").also {
+        File("src/main/kotlin/com/urosjarc/mapmaster/domain/OsmFeatures.kt").also {
             val text = it.readText()
                 .replace(featuresRgx, this.autoGenerate(name = "features", content = "\n$featuresText\n"))
                 .replace(addRgx, this.autoGenerate(name = "add", content = "\n$addText\n"))

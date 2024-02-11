@@ -1,4 +1,4 @@
-package com.urosjarc.mapmaster
+package com.urosjarc.mapmaster.domain
 
 data class OsmFeature(
     val obj: OsmObj,

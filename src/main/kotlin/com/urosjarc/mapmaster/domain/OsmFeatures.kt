@@ -1,4 +1,4 @@
-package com.urosjarc.mapmaster
+package com.urosjarc.mapmaster.domain
 
 import com.urosjarc.mapmaster.features.*
 
