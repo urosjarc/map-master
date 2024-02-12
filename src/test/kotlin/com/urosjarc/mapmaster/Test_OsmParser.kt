@@ -17,8 +17,7 @@ class Test_OsmParser {
         assertEquals(expected = 14.5156100, actual = map.maxLon)
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(
-            actual = mapSize,
-            expected = mapOf(
+            actual = mapSize, expected = mapOf(
                 "highway" to 1817, "man_made" to 91, "place" to 10,
                 "barrier" to 518, "amenity" to 512, "historic" to 17,
                 "leisure" to 49, "tourism" to 38, "railway" to 6,
@@ -62,14 +61,14 @@ class Test_OsmParser {
             actual = map.features.highway.nodes, expected = listOf(
                 HighwayNode(
                     node = OsmNode(
-                        id = 2, tags = mutableMapOf(
+                        id = 2,
+                        tags = mutableMapOf(
                             "highway" to "traffic_signals",
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
                         position = MapPosition(lat = 20.0, lon = 21.0),
-                    ),
-                    type = HighwayType.TRAFFIC_SIGNALS
+                    ), type = HighwayType.TRAFFIC_SIGNALS
                 )
             )
         )
@@ -91,10 +90,8 @@ class Test_OsmParser {
 
 
         val feature = MaxspeedWay(
-            type = MaxspeedType.OTHER,
-            way = OsmWay(
-                id = 4698189,
-                tags = mutableMapOf(
+            type = MaxspeedType.OTHER, way = OsmWay(
+                id = 4698189, tags = mutableMapOf(
                     "bicycle" to "use_sidepath",
                     "foot" to "use_sidepath",
                     "highway" to "primary",
@@ -110,11 +107,10 @@ class Test_OsmParser {
                     "source:maxspeed" to "sign",
                     "surface" to "asphalt",
                     "turn:lanes" to "left|through|right"
-                ),
-                nodes = mutableListOf(
-                    OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)),
-                    OsmNode(
-                        id = 2, tags = mutableMapOf(
+                ), nodes = mutableListOf(
+                    OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), OsmNode(
+                        id = 2,
+                        tags = mutableMapOf(
                             "highway" to "traffic_signals",
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
@@ -139,32 +135,25 @@ class Test_OsmParser {
         val mapSize = map.features.all.map { it.key to it.value.size }.toMap()
         assertEquals(actual = mapSize, expected = mapOf("highway" to 2, "building" to 1))
         assertEquals(
-            actual = map.features.building.rels,
-            expected = mutableListOf(
+            actual = map.features.building.rels, expected = mutableListOf(
                 BuildingRel(
-                    type = BuildingType.YES,
-                    rel = OsmRel(
-                        id = 4,
-                        tags = mutableMapOf(
-                            "addr:housename" to "Konjusnica",
-                            "building" to "yes",
-                            "type" to "multipolygon"
-                        ),
-                        nodes = mutableListOf(
-                            OsmMember(obj = OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), role = "inner")
-                        ),
-                        ways = mutableListOf(
+                    type = BuildingType.YES, rel = OsmRel(
+                        id = 4, tags = mutableMapOf(
+                            "addr:housename" to "Konjusnica", "building" to "yes", "type" to "multipolygon"
+                        ), nodes = mutableListOf(
+                            OsmMember(
+                                objType = OsmFeature.Type.NODE, obj = OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), role = "inner"
+                            )
+                        ), ways = mutableListOf(
                             OsmMember(
                                 role = "outer",
+                                objType = OsmFeature.Type.NODE,
                                 obj = OsmWay(
-                                    id = 3,
-                                    tags = mutableMapOf(
+                                    id = 3, tags = mutableMapOf(
                                         "highway" to "residential",
                                         "name" to "Mivka",
-                                    ),
-                                    nodes = mutableListOf(
-                                        OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)),
-                                        OsmNode(
+                                    ), nodes = mutableListOf(
+                                        OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), OsmNode(
                                             id = 2,
                                             position = MapPosition(
                                                 lat = 20.0,

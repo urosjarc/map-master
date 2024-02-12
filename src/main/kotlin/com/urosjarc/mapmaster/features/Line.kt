@@ -1,55 +1,51 @@
-package com.urosjarc.mapmaster.features
+			package com.urosjarc.mapmaster.features
+            import com.urosjarc.mapmaster.domain.* 
+            
+            /**
+             * This file is auto generated!
+             */
 
-import com.urosjarc.mapmaster.domain.OsmFeature
-import com.urosjarc.mapmaster.domain.OsmNode
-import com.urosjarc.mapmaster.domain.OsmRel
-import com.urosjarc.mapmaster.domain.OsmWay
+            data class LineNode(
+                val node: OsmNode,
+                val type: LineType
+            )
 
-/**
- * This file is auto generated!
- */
+            data class LineWay(
+                val way: OsmWay,
+                val type: LineType
+            )
 
-data class LineNode(
-    val node: OsmNode,
-    val type: LineType
-)
+            data class LineRel(
+                val rel: OsmRel,
+                val type: LineType
+            )
 
-data class LineWay(
-    val way: OsmWay,
-    val type: LineType
-)
+            data class LineFeatures(
+                val nodes: MutableList<LineNode> = mutableListOf(),
+                val ways: MutableList<LineWay> = mutableListOf(),
+                val rels: MutableList<LineRel> = mutableListOf()
+            ) {
+                fun add(feature: OsmFeature) {
+                    val enumValue = feature.obj.tags["line"]
+                    val type = LineType.entries.firstOrNull { it.value == enumValue }
+                        ?: LineType.OTHER
+                    when (feature.objType) {
 
-data class LineRel(
-    val rel: OsmRel,
-    val type: LineType
-)
+                        OsmFeature.Type.NODE ->
+                            this.nodes.add(LineNode(node = feature.obj as OsmNode, type = type))
 
-data class LineFeatures(
-    val nodes: MutableList<LineNode> = mutableListOf(),
-    val ways: MutableList<LineWay> = mutableListOf(),
-    val rels: MutableList<LineRel> = mutableListOf()
-) {
-    fun add(feature: OsmFeature) {
-        val enumValue = feature.obj.tags["line"]
-        val type = LineType.entries.firstOrNull { it.value == enumValue }
-            ?: LineType.OTHER
-        when (feature.objType) {
+                        OsmFeature.Type.RELATIONSHIP ->
+                            this.rels.add(LineRel(rel = feature.obj as OsmRel, type = type))
 
-            OsmFeature.Type.NODE ->
-                this.nodes.add(LineNode(node = feature.obj as OsmNode, type = type))
+                        OsmFeature.Type.WAY ->
+                            this.ways.add(LineWay(way = feature.obj as OsmWay, type = type))
 
-            OsmFeature.Type.RELATIONSHIP ->
-                this.rels.add(LineRel(rel = feature.obj as OsmRel, type = type))
+                    }
+                }
+            }
 
-            OsmFeature.Type.WAY ->
-                this.ways.add(LineWay(way = feature.obj as OsmWay, type = type))
-
-        }
-    }
-}
-
-enum class LineType(val value: String) {
-    BUSBAR("busbar"),                   // Identifies a power line as a busbar, the central connection in a substation
-    BAY("bay"),                         // A power line within a substation which connects a circuit to a busbar.
-    OTHER("other")
-}
+            enum class LineType(val value: String) {
+                BUSBAR("busbar"),                   // Identifies a power line as a busbar, the central connection in a substation
+				BAY("bay"),                         // A power line within a substation which connects a circuit to a busbar.
+                OTHER("other")
+            }

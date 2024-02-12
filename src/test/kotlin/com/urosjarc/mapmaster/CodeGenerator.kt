@@ -5,24 +5,44 @@ import org.jsoup.nodes.Document
 import java.io.File
 
 object CodeGenerator {
+    data class ClassEnumInfo(
+        val key: String,
+        val value: String,
+        val desc: String
+    )
+
     @JvmStatic
     fun main(args: Array<String>) {
         val url = CodeGenerator::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
         val doc: Document = Jsoup.parse(File(url.path))
-        val classes = mutableMapOf<String, MutableSet<Pair<String, String>>>()
+        val classes = mutableMapOf<String, MutableList<ClassEnumInfo>>()
         for (tr in doc.select("tr")) {
-            try {
-                val tds = tr.select("td")
-                val ele = tds.subList(0, 2)
-                val key = ele[0].selectFirst("a")?.text() ?: throw Exception("Fail")
-                val value = ele[1].selectFirst("a")?.text() ?: throw Exception("Fail")
-                val desc = tds[3].text()
+            val tds = tr.select("td")
 
-                if (key.isBlank() || value.isBlank() || key == "source" || key.contains(":") || value.contains(" ") || key.contains(" ")) continue
-                val list = classes.getOrPut(key = key) { mutableSetOf() }
-                list.firstOrNull { it.first == value } ?: list.add(value to desc)
-            } catch (e: Exception) {
-            }
+            if (tds.size < 3) continue
+
+            val ele = tds.subList(0, 2)
+
+            val eInfo = ClassEnumInfo(
+                key = ele[0].selectFirst("a")?.text() ?: continue,
+                value = ele[1].selectFirst("a")?.text() ?: continue,
+                desc = tds[3].text()
+            )
+
+            val failTests = listOf(
+                eInfo.key.isBlank(),
+                eInfo.value.isBlank(),
+                eInfo.key == "source",
+                eInfo.key.contains(":"),
+                eInfo.value.contains(" "),
+                eInfo.key.contains(" ")
+            )
+
+            if (failTests.contains(true)) continue
+
+            val list = classes.getOrPut(key = eInfo.key) { mutableListOf() }
+
+            list.firstOrNull { it.value == eInfo.value } ?: list.add(eInfo)
         }
 
         createFeatures(classes = classes)
@@ -34,23 +54,23 @@ object CodeGenerator {
         .map { it.replaceFirstChar(Char::uppercaseChar) }
         .joinToString("")
 
-    fun createFeatures(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
-        classes.forEach { feature, u ->
+    fun createFeatures(classes: MutableMap<String, MutableList<ClassEnumInfo>>) {
+        classes.forEach { feature, eInfos ->
             val className = className(feature = feature)
             val enums = mutableListOf<String>()
 
-            u.forEach {
-                val enumName = it.first.uppercase()
+            eInfos.forEach {
+                val enumName = it.value.uppercase()
                     .replace("-", "_")
                     .replace("9", "NINE_")
                     .replace("10", "TEN_")
-                var enumDesc = it.second.replace("\n", "")
+                var enumDesc = it.desc.replace("\n", "")
                 if (enumDesc.isNotBlank()) enumDesc = "// " + enumDesc
-                enums.add("%-35s %s".format("$enumName(\"${it.first}\"),", enumDesc))
+                enums.add("%-35s %s".format("$enumName(\"${it.value}\"),", enumDesc))
             }
 
             val text = "\t\t\t" + """package com.urosjarc.mapmaster.features
-            import com.urosjarc.mapmaster.* 
+            import com.urosjarc.mapmaster.domain.* 
             
             /**
              * This file is auto generated!
@@ -108,7 +128,7 @@ object CodeGenerator {
 
     private fun autoGenerate(name: String, content: String) = """// Autogenerate start: $name$content// Autogenerate end: $name"""
 
-    fun createOsmFeatures(classes: MutableMap<String, MutableSet<Pair<String, String>>>) {
+    fun createOsmFeatures(classes: MutableMap<String, MutableList<ClassEnumInfo>>) {
 
         val features = mutableListOf<String>()
         val add = mutableListOf<String>()

@@ -1,3 +1,4 @@
+import com.urosjarc.mapmaster.domain.SrtmMap
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

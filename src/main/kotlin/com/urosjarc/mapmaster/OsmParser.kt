@@ -1,6 +1,5 @@
 package com.urosjarc.mapmaster
 
-import SrtmMap
 import com.urosjarc.mapmaster.domain.*
 import kotlin.io.path.Path
 import kotlin.io.path.forEachLine
@@ -138,7 +137,7 @@ object OsmParser {
             } else throw Exception(it)
         }
 
-        //Connecting nodes
+        //Adding node features
         osmNodes.forEach { _, node ->
             map!!.features.add(feature = OsmFeature(obj = node, objType = OsmFeature.Type.NODE))
         }
@@ -146,18 +145,23 @@ object OsmParser {
         //Connecting ways
         osmWaysRefs.forEach { wayId, nodesIds ->
             val way = osmWays[wayId]!!
-            nodesIds.forEach { nodeId -> way.nodes.add(osmNodes[nodeId]!!) }
+            nodesIds.forEach { nodeId -> way.connect(node = osmNodes[nodeId]!!) }
             map!!.features.add(feature = OsmFeature(obj = way, objType = OsmFeature.Type.WAY))
         }
 
         //Connecting relations
         osmRels.forEach { relId, rel ->
-            osmRelsMembers[relId]!!.forEach {
-                val role = if (it.role.isBlank()) null else it.role
-                when (it.type) {
-                    OsmFeature.Type.NODE -> osmNodes[it.ref]?.let { rel.nodes.add(OsmMember(obj = it, role = role)) }
-                    OsmFeature.Type.WAY -> osmWays[it.ref]?.let { rel.ways.add(OsmMember(obj = it, role = role)) }
-                    OsmFeature.Type.RELATIONSHIP -> osmRels[it.ref]?.let { rel.rels.add(OsmMember(obj = it, role = role)) }
+            osmRelsMembers[relId]!!.forEach { member ->
+                val role = if (member.role.isBlank()) null else member.role
+                when (member.type) {
+                    OsmFeature.Type.NODE ->
+                        osmNodes[member.ref]?.let { rel.nodes.add(OsmMember(obj = it, role = role, objType = OsmFeature.Type.NODE)) }
+
+                    OsmFeature.Type.WAY ->
+                        osmWays[member.ref]?.let { rel.ways.add(OsmMember(obj = it, role = role, objType = OsmFeature.Type.WAY)) }
+
+                    OsmFeature.Type.RELATIONSHIP ->
+                        osmRels[member.ref]?.let { rel.rels.add(OsmMember(obj = it, role = role, objType = OsmFeature.Type.RELATIONSHIP)) }
                 }
             }
             map!!.features.add(feature = OsmFeature(obj = rel, objType = OsmFeature.Type.RELATIONSHIP))
