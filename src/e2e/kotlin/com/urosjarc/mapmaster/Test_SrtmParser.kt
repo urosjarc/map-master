@@ -2,7 +2,7 @@ package com.urosjarc.mapmaster
 
 import SrtmParser
 import com.urosjarc.mapmaster.domain.MapPosition
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 
 class Test_SrtmParser {
     @Test

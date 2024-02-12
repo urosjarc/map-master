@@ -2,14 +2,14 @@ package com.urosjarc.mapmaster
 
 import com.urosjarc.mapmaster.domain.*
 import com.urosjarc.mapmaster.features.*
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class Test_OsmParser {
     @Test
     fun `test full map`() {
-        val url = Test_OsmParser::class.java.getResource("/Slovenija_Ljubljana_Trnovo.osm")!!
+        val url = Test_OsmParser::class.java.getResource("/osm/Slovenija_Ljubljana_Trnovo.osm")!!
         val map = OsmParser.parse(url.path)
         assertEquals(expected = 46.0369400, actual = map.minLat)
         assertEquals(expected = 14.4979900, actual = map.minLon)
@@ -36,7 +36,7 @@ class Test_OsmParser {
 
     @Test
     fun `test empty map`() {
-        val url = Test_OsmParser::class.java.getResource("/empty_map.osm")!!
+        val url = Test_OsmParser::class.java.getResource("/osm/empty_map.osm")!!
         val map = OsmParser.parse(url.path)
         assertEquals(expected = 46.0369400, actual = map.minLat)
         assertEquals(expected = 14.4979900, actual = map.minLon)
@@ -49,7 +49,7 @@ class Test_OsmParser {
 
     @Test
     fun `test map with nodes`() {
-        val url = Test_OsmParser::class.java.getResource("/map_with_nodes.osm")!!
+        val url = Test_OsmParser::class.java.getResource("/osm/map_with_nodes.osm")!!
         val map = OsmParser.parse(url.path)
         assertEquals(expected = 1.0, actual = map.minLat)
         assertEquals(expected = 2.0, actual = map.minLon)
@@ -76,7 +76,7 @@ class Test_OsmParser {
 
     @Test
     fun `test map with ways`() {
-        val url = Test_OsmParser::class.java.getResource("/map_with_ways.osm")!!
+        val url = Test_OsmParser::class.java.getResource("/osm/map_with_ways.osm")!!
         val map = OsmParser.parse(url.path)
         assertEquals(expected = 1.0, actual = map.minLat)
         assertEquals(expected = 2.0, actual = map.minLon)
@@ -126,7 +126,7 @@ class Test_OsmParser {
 
     @Test
     fun `test map with rels`() {
-        val url = Test_OsmParser::class.java.getResource("/map_with_rels.osm")!!
+        val url = Test_OsmParser::class.java.getResource("/osm/map_with_rels.osm")!!
         val map = OsmParser.parse(url.path)
         assertEquals(expected = 1.0, actual = map.minLat)
         assertEquals(expected = 2.0, actual = map.minLon)

@@ -112,7 +112,7 @@ data class OsmMap(
         var minStartDist = Double.MAX_VALUE
         var minEndDist = Double.MAX_VALUE
 
-        //Search travel space for closest nodes
+        //Search travel space for closest end and start node
         var numNodes = 0
         ways.forEach { way ->
             way.nodes.forEach { node ->
@@ -142,6 +142,7 @@ data class OsmMap(
         //Traverse search space
         while (ways.isNotEmpty()) {
             var current = discoveredNodes.remove()
+            //If found end node backtrace the solution
             if (current == endNode) {
                 val route = mutableListOf(current)
                 while (cameFrom.contains(key = current)) {
@@ -157,7 +158,7 @@ data class OsmMap(
                 if (tentativeScore < siblingsGScore) {
                     cameFrom[sibling] = current
                     gScore[sibling] = tentativeScore
-                    fScore[sibling] = tentativeScore + this.costEstimation(start = startNode, end = endNode, vehicle = vehicle))
+                    fScore[sibling] = tentativeScore + this.costEstimation(start = startNode, end = endNode, vehicle = vehicle)
                     if (!discoveredNodes.contains(sibling)) {
                         discoveredNodes.add(sibling)
                     }

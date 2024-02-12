@@ -4,7 +4,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 
-object CodeGenerator {
+object GenerateFeatures {
     data class ClassEnumInfo(
         val key: String,
         val value: String,
@@ -13,7 +13,7 @@ object CodeGenerator {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val url = CodeGenerator::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
+        val url = GenerateFeatures::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
         val doc: Document = Jsoup.parse(File(url.path))
         val classes = mutableMapOf<String, MutableList<ClassEnumInfo>>()
         for (tr in doc.select("tr")) {
@@ -150,13 +150,13 @@ object CodeGenerator {
         val featuresText = features.joinToString("\n")
         val addText = add.joinToString("\n")
 
-        val featuresRgx = Regex(this.autoGenerate(name = "features", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
-        val addRgx = Regex(this.autoGenerate(name = "add", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
+        val featuresRgx = Regex(autoGenerate(name = "features", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
+        val addRgx = Regex(autoGenerate(name = "add", content = "(.*)"), RegexOption.DOT_MATCHES_ALL)
 
         File("src/main/kotlin/com/urosjarc/mapmaster/domain/OsmFeatures.kt").also {
             val text = it.readText()
-                .replace(featuresRgx, this.autoGenerate(name = "features", content = "\n$featuresText\n"))
-                .replace(addRgx, this.autoGenerate(name = "add", content = "\n$addText\n"))
+                .replace(featuresRgx, autoGenerate(name = "features", content = "\n$featuresText\n"))
+                .replace(addRgx, autoGenerate(name = "add", content = "\n$addText\n"))
             it.writeText(text)
         }
     }

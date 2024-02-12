@@ -14,12 +14,10 @@ repositories {
 }
 
 dependencies {
-    val version = "0.3.1"
     this.implementation("me.xdrop:fuzzywuzzy:1.4.0")
     this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
-
-    this.testImplementation("org.jsoup:jsoup:1.17.2")
 }
+
 
 testing {
     suites {
@@ -28,7 +26,7 @@ testing {
                 useJUnitJupiter()
                 dependencies {
                     this.implementation("org.jetbrains.kotlin:kotlin-test")
-                    this.implementation("org.apache.logging.log4j:log4j-core:2.17.1")
+                    this.implementation("org.apache.logging.log4j:log4j-core:2.20.0")
                     this.implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
                     this.implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
                 }
@@ -38,6 +36,15 @@ testing {
         register<JvmTestSuite>("e2e") {
             dependencies {
                 this.implementation(project())
+
+                this.implementation("org.jsoup:jsoup:1.17.2")
+
+                val ktor_version = "2.3.8"
+                this.implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
+                this.implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+                this.implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
+                this.implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+                this.implementation("io.ktor:ktor-server-cors:$ktor_version")
             }
         }
     }

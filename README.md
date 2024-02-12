@@ -8,4 +8,4 @@
  * [SRTM vs DMV Slovenije](http://fgg-web.fgg.uni-lj.si/sugg/referati/2009/SZGG09_Berk_Zagar.pdf)
  * [Login](https://urs.earthdata.nasa.gov/)
  * [SRTM Nasa](https://search.earthdata.nasa.gov/search)
- * [SRTM instructions](https://github.com/dodie/srtm-map-renderer)
+ * [SRTM instructions](https://github.com/dodie/srtm-index-renderer)
