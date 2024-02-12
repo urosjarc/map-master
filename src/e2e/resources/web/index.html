@@ -8,6 +8,22 @@
 
 <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 <link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
+<div>
+    <label>Search:</label>
+    <input  id="streetname" autoComplete="on"/>
+    <button onclick="searchStreetName()">Search</button>
+
+    <br>
+    <label>Start:</label>
+    <select id="start"></select>
+    <button onclick="clearStart()">Clear</button>
+
+    <br>
+    <label>End:</label>
+    <select id="end"></select>
+    <button onclick="clearEnd()">Clear</button>
+</div>
+
 <div id="osm-map"></div>
 
 <script src="index.js"></script>

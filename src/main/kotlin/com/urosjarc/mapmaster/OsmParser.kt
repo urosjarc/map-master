@@ -139,14 +139,14 @@ object OsmParser {
 
         //Adding node features
         osmNodes.forEach { _, node ->
-            map!!.features.add(feature = OsmFeature(obj = node, objType = OsmFeature.Type.NODE))
+            map!!.add(feature = OsmFeature(obj = node, objType = OsmFeature.Type.NODE))
         }
 
         //Connecting ways
         osmWaysRefs.forEach { wayId, nodesIds ->
             val way = osmWays[wayId]!!
             nodesIds.forEach { nodeId -> way.connect(node = osmNodes[nodeId]!!) }
-            map!!.features.add(feature = OsmFeature(obj = way, objType = OsmFeature.Type.WAY))
+            map!!.add(feature = OsmFeature(obj = way, objType = OsmFeature.Type.WAY))
         }
 
         //Connecting relations
@@ -164,7 +164,7 @@ object OsmParser {
                         osmRels[member.ref]?.let { rel.rels.add(OsmMember(obj = it, role = role, objType = OsmFeature.Type.RELATIONSHIP)) }
                 }
             }
-            map!!.features.add(feature = OsmFeature(obj = rel, objType = OsmFeature.Type.RELATIONSHIP))
+            map!!.add(feature = OsmFeature(obj = rel, objType = OsmFeature.Type.RELATIONSHIP))
         }
 
         return map!!

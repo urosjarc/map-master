@@ -75,7 +75,7 @@ data class OsmMap(
         Utils.search(query = query, choices = this.street_to_feature.keys, limit = limit)
 
     fun searchClosestStreets(position: MapPosition, radius: Float = 100f): List<MapMatch> {
-        var matches = mutableListOf<MapMatch>()
+        val matches = mutableListOf<MapMatch>()
         this.position_to_street.forEach { (pos, node) ->
             val distance = position.distance(position = pos)
             val address = node.address

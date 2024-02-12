@@ -1,5 +1,6 @@
 package com.urosjarc.mapmaster
 
+import com.urosjarc.mapmaster.domain.MapMatch
 import com.urosjarc.mapmaster.domain.OsmSuitability
 import com.urosjarc.mapmaster.domain.OsmVehicle
 import io.ktor.http.*
@@ -38,13 +39,18 @@ fun main() {
         routing {
             get("/lines") {
                 val ways = map.getTransitWays(vehicle = OsmVehicle.BODY, suitability = OsmSuitability.CATASTROFIC)
-                val matrix = mutableListOf<MutableList<List<Double>>>()
+                val matrix = mutableListOf<MutableList<Map<String, Double>>>()
                 ways.forEach { way ->
-                    val coordinates = mutableListOf<List<Double>>()
-                    way.nodes.forEach { node -> coordinates.add(node.position.toList())}
+                    val coordinates = mutableListOf<Map<String, Double>>()
+                    way.nodes.forEach { node -> coordinates.add(node.position.toMap()) }
                     matrix.add(coordinates)
                 }
                 call.respond(matrix)
+            }
+            get("/streets") {
+                val query = this.call.request.queryParameters["query"]!!
+                val streets: List<MapMatch> = map.searchStreet(query = query)
+                call.respond(streets.map { it.match }.toList())
             }
         }
     }.start(wait = true)
