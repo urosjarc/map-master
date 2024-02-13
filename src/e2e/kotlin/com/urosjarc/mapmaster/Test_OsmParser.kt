@@ -67,7 +67,7 @@ class Test_OsmParser {
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
-                        position = MapPosition(lat = 20.0, lon = 21.0),
+                        position = MapVector(lat = 20.0, lon = 21.0),
                     ), type = HighwayType.TRAFFIC_SIGNALS
                 )
             )
@@ -108,14 +108,14 @@ class Test_OsmParser {
                     "surface" to "asphalt",
                     "turn:lanes" to "left|through|right"
                 ), nodes = mutableListOf(
-                    OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), OsmNode(
+                    OsmNode(id = 1, position = MapVector(lat = 10.0, lon = 11.0)), OsmNode(
                         id = 2,
                         tags = mutableMapOf(
                             "highway" to "traffic_signals",
                             "traffic_signals" to "traffic_lights",
                             "traffic_signals:direction" to "backward",
                         ),
-                        position = MapPosition(lat = 20.0, lon = 21.0),
+                        position = MapVector(lat = 20.0, lon = 21.0),
                     )
                 )
             )
@@ -142,7 +142,7 @@ class Test_OsmParser {
                             "addr:housename" to "Konjusnica", "building" to "yes", "type" to "multipolygon"
                         ), nodes = mutableListOf(
                             OsmMember(
-                                objType = OsmFeature.Type.NODE, obj = OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), role = "inner"
+                                objType = OsmFeature.Type.NODE, obj = OsmNode(id = 1, position = MapVector(lat = 10.0, lon = 11.0)), role = "inner"
                             )
                         ), ways = mutableListOf(
                             OsmMember(
@@ -153,9 +153,9 @@ class Test_OsmParser {
                                         "highway" to "residential",
                                         "name" to "Mivka",
                                     ), nodes = mutableListOf(
-                                        OsmNode(id = 1, position = MapPosition(lat = 10.0, lon = 11.0)), OsmNode(
+                                        OsmNode(id = 1, position = MapVector(lat = 10.0, lon = 11.0)), OsmNode(
                                             id = 2,
-                                            position = MapPosition(
+                                            position = MapVector(
                                                 lat = 20.0,
                                                 lon = 21.0,
                                             ),

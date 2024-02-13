@@ -71,7 +71,7 @@ object OsmParser {
             } else if (line.startsWith("<node")) {
                 state = State.NODE
                 val attrs = parseAttributes(line)
-                val pos = MapPosition(
+                val pos = MapVector(
                     lat = attrs["lat"]!!.toDouble(),
                     lon = attrs["lon"]!!.toDouble(),
                 )

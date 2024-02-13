@@ -7,6 +7,7 @@ const startCordLat = document.getElementById('startCordLat')
 const startCordLon= document.getElementById('startCordLon')
 const endCordLat = document.getElementById('endCordLat')
 const endCordLon= document.getElementById('endCordLon')
+const navodila= document.getElementById('navodila')
 
 const polylines = [];
 const markers = [];
@@ -48,6 +49,7 @@ function clearEnd() {
 function clearMap(){
     polylines.forEach(item => index.removeLayer(item))
     markers.forEach(item => index.removeLayer(item))
+    navodila.innerHTML = ""
 }
 
 function endSelected() {
@@ -107,6 +109,25 @@ function searchBestRoute() {
         res.json().then(data => {
             const line = L.polyline(data, {weight: 3, color: 'red'}).addTo(index)
             polylines.push(line)
+
+            navodila.innerHTML = ""
+            let count = 0
+            for(point of data){
+                if(point.description != null){
+                    const desc = `${++count}. ${point.description}`
+                    const m = L.marker(point, {title: desc}).addTo(index);
+                    markers.push(m)
+
+                    navodila.innerHTML += `
+                    <tr>
+                        <td>
+                            ${desc}
+                        </td>
+                    </tr>
+                `
+                }
+
+            }
         })
     })
 }

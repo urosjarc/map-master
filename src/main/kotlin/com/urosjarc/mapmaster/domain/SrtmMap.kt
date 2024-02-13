@@ -29,7 +29,7 @@ class SrtmMap(
         return if (elevation.toInt() == MAGIC_DATA_VOID) null else elevation.toFloat()
     }
 
-    fun elevation(position: MapPosition): Float? {
+    fun elevation(position: MapVector): Float? {
         if ((position.lat < this.lat || position.lat >= this.lat + 1) || position.lon < this.lon || position.lon >= this.lon + 1)
             throw SrtmException("Elevation coordinates out of bound: $position")
 

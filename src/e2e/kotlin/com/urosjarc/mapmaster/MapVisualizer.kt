@@ -1,8 +1,6 @@
 package com.urosjarc.mapmaster
 
-import com.urosjarc.mapmaster.domain.MapMatch
-import com.urosjarc.mapmaster.domain.OsmSuitability
-import com.urosjarc.mapmaster.domain.OsmVehicle
+import com.urosjarc.mapmaster.domain.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -13,6 +11,9 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 
 fun main() {
@@ -22,6 +23,7 @@ fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         install(ContentNegotiation) {
             json(Json {
+                allowSpecialFloatingPointValues = true
                 prettyPrint = true
                 isLenient = true
             })
@@ -54,7 +56,6 @@ fun main() {
             }
             get("/street") {
                 val name = this.call.request.queryParameters["name"]!!
-                println(name)
                 val features = map.getStreetFeatures(name = name)
                 val ele = features!!.first().obj
                 call.respond(ele.position.toMap())
@@ -64,14 +65,22 @@ fun main() {
                 val end = this.call.request.queryParameters["end"]!!
                 val startPos = map.getStreetFeatures(name = start)!!.first().obj.position
                 val endPos = map.getStreetFeatures(name = end)!!.first().obj.position
-                val nodes = map.searchShortestTransitWay(
+                val routeNodes: List<OsmRouteNode> = map.searchShortestTransitWay(
                     start = startPos,
                     finish = endPos,
                     vehicle = OsmVehicle.BODY,
                     suitability = OsmSuitability.CATASTROFIC
                 )
 
-                call.respond(nodes.map { it.position.toMap() })
+                val routeNodeJson = routeNodes.map { JsonObject(mapOf(
+                    "turnAngle" to JsonPrimitive(it.turnAngle),
+                    "address" to JsonPrimitive(it.address),
+                    "lat" to JsonPrimitive(it.vector.lat),
+                    "lon" to JsonPrimitive(it.vector.lon),
+                    "description" to JsonPrimitive(it.description),
+                ))}
+
+                call.respond(JsonArray(routeNodeJson))
             }
         }
     }.start(wait = true)

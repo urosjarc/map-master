@@ -3,7 +3,7 @@ package com.urosjarc.mapmaster.domain
 class OsmNode(
     override val id: Long,
     override val tags: MutableMap<String, String> = mutableMapOf(),
-    override val position: MapPosition,
+    override val position: MapVector,
     val elevation: Float? = null,
     val parents: MutableSet<OsmWay> = mutableSetOf(),
     val siblings: MutableSet<OsmNode> = mutableSetOf(),

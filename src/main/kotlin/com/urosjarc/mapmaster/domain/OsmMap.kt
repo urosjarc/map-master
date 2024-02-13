@@ -6,6 +6,7 @@ import com.urosjarc.mapmaster.rules.CyclewayTypeSuitability
 import com.urosjarc.mapmaster.rules.FootwayTypeSuitability
 import com.urosjarc.mapmaster.rules.HighwayTypeSuitability
 import java.util.*
+import kotlin.math.absoluteValue
 
 data class OsmMap(
     val minLat: Double,
@@ -16,7 +17,7 @@ data class OsmMap(
 
     val features = OsmFeatures()
     private val street_to_feature = mutableMapOf<String, MutableList<OsmFeature>>()
-    private val position_to_street = mutableMapOf<MapPosition, OsmNode>()
+    private val position_to_street = mutableMapOf<MapVector, OsmNode>()
 
     fun add(feature: OsmFeature): Boolean {
         val street = feature.obj.street
@@ -74,10 +75,10 @@ data class OsmMap(
     fun searchStreet(query: String, limit: Int = 10): List<MapMatch> =
         Utils.search(query = query, choices = this.street_to_feature.keys, limit = limit)
 
-    fun searchClosestStreets(position: MapPosition, radius: Float = 100f): List<MapMatch> {
+    fun searchClosestStreets(position: MapVector, radius: Float = 100f): List<MapMatch> {
         val matches = mutableListOf<MapMatch>()
         this.position_to_street.forEach { (pos, node) ->
-            val distance = position.distance(position = pos)
+            val distance = position.distance(vector = pos)
             val address = node.address
             if (distance < radius && address != null) {
                 matches.add(MapMatch(match = address, distance = distance))
@@ -95,12 +96,80 @@ data class OsmMap(
         return start.position.distance(end.position)
     }
 
+    fun createRoute(nodes: List<OsmNode>): List<OsmRouteNode> {
+
+        val routeNodes = mutableListOf(
+            OsmRouteNode(
+                turnAngle = 0.0,
+                address = nodes.first().address,
+                vector = nodes.first().position,
+                description = "Start your journey..."
+            )
+        )
+
+        var traveledDistance = 0.0
+        for (i in 1..<nodes.size - 1) {
+            val preNode = nodes[i - 1]
+            val curNode = nodes[i]
+            val nextNode = nodes[i + 1]
+
+            traveledDistance += preNode.position.distance(curNode.position)
+            val firstMove = curNode.position.minus(preNode.position)
+            val secondMove = nextNode.position.minus(curNode.position)
+
+            val turnAngle = firstMove.angle(secondMove)
+            var description: String? = null
+
+            val preName = preNode.parents.first().tags["name"]
+            val curName = curNode.parents.first().tags["name"]
+
+            val angle = turnAngle.absoluteValue
+            if (angle > 45) {
+                description = "After ${traveledDistance.toInt()} meters turn"
+                description += """ ${angle.toInt()}deg to the """
+                description += if (turnAngle < 0) "left" else "right"
+                if (curName != preName) {
+                    if (curName == null)
+                        description += " onto unknown street"
+                    else {
+                        val surface = curNode.parents.first().tags["surface"]
+                        val type = curNode.parents.first().tags["highway"]
+                        description += " onto '$curName' street (type: $type, surface: $surface)"
+                    }
+                }
+
+
+                traveledDistance = 0.0
+            }
+
+            routeNodes.add(
+                OsmRouteNode(
+                    turnAngle = turnAngle,
+                    address = curNode.address,
+                    vector = curNode.position,
+                    description = description
+                )
+            )
+        }
+
+        routeNodes.add(
+            OsmRouteNode(
+                turnAngle = 0.0,
+                address = nodes.last().address,
+                vector = nodes.last().position,
+                description = "You finished your journey..."
+            )
+        )
+
+        return routeNodes
+    }
+
     fun searchShortestTransitWay(
-        start: MapPosition,
-        finish: MapPosition,
+        start: MapVector,
+        finish: MapVector,
         vehicle: OsmVehicle,
         suitability: OsmSuitability
-    ): MutableList<OsmNode> {
+    ): List<OsmRouteNode> {
 
         //Get search space
         val nodes = this.getTransitWays(vehicle = vehicle, suitability = suitability).flatMap { it.nodes }
@@ -123,8 +192,8 @@ data class OsmMap(
             fScore[node] = Double.POSITIVE_INFINITY
 
             numNodes++
-            val toStartDist = start.distance(position = node.position)
-            val toFinishDist = finish.distance(position = node.position)
+            val toStartDist = start.distance(vector = node.position)
+            val toFinishDist = finish.distance(vector = node.position)
             if (toStartDist < minStartDist) {
                 startNode = node
                 minStartDist = toStartDist
@@ -156,7 +225,7 @@ data class OsmMap(
                     current = cameFrom[current]
                     route.add(0, current)
                 }
-                return route
+                return this.createRoute(route)
             }
 
             current.siblings.forEach { sibling ->

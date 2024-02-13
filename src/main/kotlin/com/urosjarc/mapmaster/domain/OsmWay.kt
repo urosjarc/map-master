@@ -7,8 +7,8 @@ class OsmWay(
     val rels: MutableList<OsmRel> = mutableListOf(),
 ) : OsmObj(id = id, tags = tags) {
 
-    override val position get(): MapPosition {
-        val center = MapPosition(lat = 0.0, lon = 0.0)
+    override val position get(): MapVector {
+        val center = MapVector(lat = 0.0, lon = 0.0)
         this.nodes.forEach {
             center.lat += it.position.lat
             center.lon += it.position.lon
