@@ -30,6 +30,7 @@ class MapVisualizer {
 
         val port = System.getenv("PORT")?.toInt() ?: 8080
 
+        println(port)
         embeddedServer(Netty, port = port, host = "0.0.0.0") {
             install(ContentNegotiation) {
                 json(Json {
