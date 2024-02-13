@@ -1,10 +1,14 @@
 package com.urosjarc.mapmaster
 
-import com.urosjarc.mapmaster.domain.*
+import com.urosjarc.mapmaster.domain.MapMatch
+import com.urosjarc.mapmaster.domain.OsmRouteNode
+import com.urosjarc.mapmaster.domain.OsmSuitability
+import com.urosjarc.mapmaster.domain.OsmVehicle
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
@@ -14,74 +18,89 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import org.junit.jupiter.api.Test
+import java.io.File
 
 
-fun main() {
-    val url = Test_OsmParser::class.java.getResource("/osm/Slovenija_Ljubljana_Trnovo.osm")!!
-    val map = OsmParser.parse(url.path)
+class MapVisualizer {
+    @Test
+    fun main() {
+        val url = MapVisualizer::class.java.getResource("/osm/Slovenija_Ljubljana_Trnovo.osm")!!
+        val map = OsmParser.parse(url.path)
 
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
-        install(ContentNegotiation) {
-            json(Json {
-                allowSpecialFloatingPointValues = true
-                prettyPrint = true
-                isLenient = true
-            })
-        }
-        install(CORS) {
-            this.allowHeader(HttpHeaders.ContentType)
-            this.allowHeader(HttpHeaders.Authorization)
-            this.anyHost()
-            this.allowMethod(HttpMethod.Post)
-            this.allowMethod(HttpMethod.Put)
-            this.allowMethod(HttpMethod.Get)
-            this.allowMethod(HttpMethod.Delete)
-        }
+        val port = System.getenv("PORT")?.toInt() ?: 8080
 
-        routing {
-            get("/lines") {
-                val ways = map.getTransitWays(vehicle = OsmVehicle.BODY, suitability = OsmSuitability.CATASTROFIC)
-                val matrix = mutableListOf<MutableList<Map<String, Double>>>()
-                ways.forEach { way ->
-                    val coordinates = mutableListOf<Map<String, Double>>()
-                    way.nodes.forEach { node -> coordinates.add(node.position.toMap()) }
-                    matrix.add(coordinates)
+        embeddedServer(Netty, port = port, host = "0.0.0.0") {
+            install(ContentNegotiation) {
+                json(Json {
+                    allowSpecialFloatingPointValues = true
+                    prettyPrint = true
+                    isLenient = true
+                })
+            }
+            install(CORS) {
+                this.allowHeader(HttpHeaders.ContentType)
+                this.allowHeader(HttpHeaders.Authorization)
+                this.anyHost()
+                this.allowMethod(HttpMethod.Post)
+                this.allowMethod(HttpMethod.Put)
+                this.allowMethod(HttpMethod.Get)
+                this.allowMethod(HttpMethod.Delete)
+            }
+
+            routing {
+                staticResources("/", "app") {
+                    default("index.html")
                 }
-                call.respond(matrix)
-            }
-            get("/streets") {
-                val query = this.call.request.queryParameters["query"]!!
-                val streets: List<MapMatch> = map.searchStreet(query = query)
-                call.respond(streets.map { it.match }.toList())
-            }
-            get("/street") {
-                val name = this.call.request.queryParameters["name"]!!
-                val features = map.getStreetFeatures(name = name)
-                val ele = features!!.first().obj
-                call.respond(ele.position.toMap())
-            }
-            get("/route") {
-                val start = this.call.request.queryParameters["start"]!!
-                val end = this.call.request.queryParameters["end"]!!
-                val startPos = map.getStreetFeatures(name = start)!!.first().obj.position
-                val endPos = map.getStreetFeatures(name = end)!!.first().obj.position
-                val routeNodes: List<OsmRouteNode> = map.searchShortestTransitWay(
-                    start = startPos,
-                    finish = endPos,
-                    vehicle = OsmVehicle.BODY,
-                    suitability = OsmSuitability.CATASTROFIC
-                )
 
-                val routeNodeJson = routeNodes.map { JsonObject(mapOf(
-                    "turnAngle" to JsonPrimitive(it.turnAngle),
-                    "address" to JsonPrimitive(it.address),
-                    "lat" to JsonPrimitive(it.vector.lat),
-                    "lon" to JsonPrimitive(it.vector.lon),
-                    "description" to JsonPrimitive(it.description),
-                ))}
+                get("/lines") {
+                    val ways = map.getTransitWays(vehicle = OsmVehicle.BODY, suitability = OsmSuitability.CATASTROFIC)
+                    val matrix = mutableListOf<MutableList<Map<String, Double>>>()
+                    ways.forEach { way ->
+                        val coordinates = mutableListOf<Map<String, Double>>()
+                        way.nodes.forEach { node -> coordinates.add(node.position.toMap()) }
+                        matrix.add(coordinates)
+                    }
+                    call.respond(matrix)
+                }
+                get("/streets") {
+                    val query = this.call.request.queryParameters["query"]!!
+                    val streets: List<MapMatch> = map.searchStreet(query = query)
+                    call.respond(streets.map { it.match }.toList())
+                }
+                get("/street") {
+                    val name = this.call.request.queryParameters["name"]!!
+                    val features = map.getStreetFeatures(name = name)
+                    val ele = features!!.first().obj
+                    call.respond(ele.position.toMap())
+                }
+                get("/route") {
+                    val start = this.call.request.queryParameters["start"]!!
+                    val end = this.call.request.queryParameters["end"]!!
+                    val startPos = map.getStreetFeatures(name = start)!!.first().obj.position
+                    val endPos = map.getStreetFeatures(name = end)!!.first().obj.position
+                    val routeNodes: List<OsmRouteNode> = map.searchShortestTransitWay(
+                        start = startPos,
+                        finish = endPos,
+                        vehicle = OsmVehicle.BODY,
+                        suitability = OsmSuitability.CATASTROFIC
+                    )
 
-                call.respond(JsonArray(routeNodeJson))
+                    val routeNodeJson = routeNodes.map {
+                        JsonObject(
+                            mapOf(
+                                "turnAngle" to JsonPrimitive(it.turnAngle),
+                                "address" to JsonPrimitive(it.address),
+                                "lat" to JsonPrimitive(it.vector.lat),
+                                "lon" to JsonPrimitive(it.vector.lon),
+                                "description" to JsonPrimitive(it.description),
+                            )
+                        )
+                    }
+
+                    call.respond(JsonArray(routeNodeJson))
+                }
             }
-        }
-    }.start(wait = true)
+        }.start(wait = true)
+    }
 }
