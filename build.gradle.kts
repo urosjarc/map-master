@@ -1,9 +1,12 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     `java-library`
     kotlin("jvm") version "1.9.22"
     id("com.adarshr.test-logger") version "4.0.0"
     `jvm-test-suite`
     `maven-publish`
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.urosjarc"
@@ -16,38 +19,28 @@ repositories {
 dependencies {
     this.implementation("me.xdrop:fuzzywuzzy:1.4.0")
     this.implementation("org.apache.logging.log4j:log4j-api-kotlin:1.4.0")
+
+    val ktor_version = "2.3.8"
+    this.testImplementation("org.jsoup:jsoup:1.17.2")
+    this.testImplementation("io.ktor:ktor-server-core-jvm:$ktor_version")
+    this.testImplementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
+    this.testImplementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
+    this.testImplementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
+    this.testImplementation("io.ktor:ktor-server-cors:$ktor_version")
+    this.testImplementation("org.jetbrains.kotlin:kotlin-test")
+    this.testImplementation("org.apache.logging.log4j:log4j-core:2.20.0")
+    this.testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
+    this.testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
 }
-
-
-testing {
-    suites {
-        configureEach {
-            if (this is JvmTestSuite) {
-                useJUnitJupiter()
-                dependencies {
-                    this.implementation("org.jetbrains.kotlin:kotlin-test")
-                    this.implementation("org.apache.logging.log4j:log4j-core:2.20.0")
-                    this.implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")
-                    this.implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0")
-                }
-            }
-        }
-
-        register<JvmTestSuite>("e2e") {
-            dependencies {
-                this.implementation(project())
-
-                this.implementation("org.jsoup:jsoup:1.17.2")
-
-                val ktor_version = "2.3.8"
-                this.implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
-                this.implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
-                this.implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
-                this.implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
-                this.implementation("io.ktor:ktor-server-cors:$ktor_version")
-            }
-        }
+tasks.withType<ShadowJar> {
+    manifest {
+        attributes(mapOf(
+            "Main-Class" to "com.urosjarc.mapmaster.MapVisualizer"
+        ))
     }
+    archiveClassifier.set("test")
+    from(sourceSets["test"].output)
+    configurations = listOf(project.configurations.testRuntimeClasspath.get())
 }
 
 testlogger {
@@ -55,7 +48,11 @@ testlogger {
 }
 
 kotlin {
-    jvmToolchain(19)
+    jvmToolchain(8)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 publishing {

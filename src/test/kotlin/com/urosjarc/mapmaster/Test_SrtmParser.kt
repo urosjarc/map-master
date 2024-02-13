@@ -1,6 +1,5 @@
 package com.urosjarc.mapmaster
 
-import SrtmParser
 import com.urosjarc.mapmaster.domain.MapVector
 import org.junit.jupiter.api.Test
 

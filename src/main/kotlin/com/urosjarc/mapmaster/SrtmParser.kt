@@ -1,3 +1,5 @@
+package com.urosjarc.mapmaster
+
 import com.urosjarc.mapmaster.domain.SrtmMap
 import java.io.FileInputStream
 import java.nio.ByteBuffer

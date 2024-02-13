@@ -1,1 +1,1 @@
-web: ./gradlew e2e
+web: java -jar ./build/libs/*.jar

@@ -1,8 +1,7 @@
 package com.urosjarc.mapmaster
 
 import com.urosjarc.mapmaster.domain.*
-import kotlin.io.path.Path
-import kotlin.io.path.forEachLine
+import java.io.InputStream
 
 object OsmParser {
     private enum class State { NONE, NODE, WAY, RELATION }
@@ -28,7 +27,7 @@ object OsmParser {
         return matrix.toMap()
     }
 
-    fun parse(path: String, srtmMaps: List<SrtmMap> = listOf()): OsmMap {
+    fun parse(path: InputStream, srtmMaps: List<SrtmMap> = listOf()): OsmMap {
         //Srtm maps
         val position_to_srtmMap = srtmMaps.associateBy { it.lat to it.lon }
 
@@ -53,7 +52,7 @@ object OsmParser {
         var state = State.NONE
 
         //Now parse line by line
-        Path(path).forEachLine {
+        path.bufferedReader().forEachLine {
             val line = it.trimStart()
 
             if (line.startsWith("<?xml")) {

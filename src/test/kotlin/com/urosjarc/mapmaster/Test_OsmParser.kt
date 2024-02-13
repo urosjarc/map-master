@@ -9,8 +9,8 @@ import kotlin.test.assertTrue
 class Test_OsmParser {
     @Test
     fun `test full map`() {
-        val url = Test_OsmParser::class.java.getResource("/osm/Slovenija_Ljubljana_Trnovo.osm")!!
-        val map = OsmParser.parse(url.path)
+        val url = Test_OsmParser::class.java.getResourceAsStream("/osm/Slovenija_Ljubljana_Trnovo.osm")!!
+        val map = OsmParser.parse(url)
         assertEquals(expected = 46.0369400, actual = map.minLat)
         assertEquals(expected = 14.4979900, actual = map.minLon)
         assertEquals(expected = 46.0462700, actual = map.maxLat)
@@ -36,8 +36,8 @@ class Test_OsmParser {
 
     @Test
     fun `test empty map`() {
-        val url = Test_OsmParser::class.java.getResource("/osm/empty_map.osm")!!
-        val map = OsmParser.parse(url.path)
+        val url = Test_OsmParser::class.java.getResourceAsStream("/osm/empty_map.osm")!!
+        val map = OsmParser.parse(url)
         assertEquals(expected = 46.0369400, actual = map.minLat)
         assertEquals(expected = 14.4979900, actual = map.minLon)
         assertEquals(expected = 46.0462700, actual = map.maxLat)
@@ -49,8 +49,8 @@ class Test_OsmParser {
 
     @Test
     fun `test map with nodes`() {
-        val url = Test_OsmParser::class.java.getResource("/osm/map_with_nodes.osm")!!
-        val map = OsmParser.parse(url.path)
+        val url = Test_OsmParser::class.java.getResourceAsStream("/osm/map_with_nodes.osm")!!
+        val map = OsmParser.parse(url)
         assertEquals(expected = 1.0, actual = map.minLat)
         assertEquals(expected = 2.0, actual = map.minLon)
         assertEquals(expected = 3.0, actual = map.maxLat)
@@ -76,8 +76,8 @@ class Test_OsmParser {
 
     @Test
     fun `test map with ways`() {
-        val url = Test_OsmParser::class.java.getResource("/osm/map_with_ways.osm")!!
-        val map = OsmParser.parse(url.path)
+        val url = Test_OsmParser::class.java.getResourceAsStream("/osm/map_with_ways.osm")!!
+        val map = OsmParser.parse(url)
         assertEquals(expected = 1.0, actual = map.minLat)
         assertEquals(expected = 2.0, actual = map.minLon)
         assertEquals(expected = 3.0, actual = map.maxLat)
@@ -126,8 +126,8 @@ class Test_OsmParser {
 
     @Test
     fun `test map with rels`() {
-        val url = Test_OsmParser::class.java.getResource("/osm/map_with_rels.osm")!!
-        val map = OsmParser.parse(url.path)
+        val url = Test_OsmParser::class.java.getResourceAsStream("/osm/map_with_rels.osm")!!
+        val map = OsmParser.parse(url)
         assertEquals(expected = 1.0, actual = map.minLat)
         assertEquals(expected = 2.0, actual = map.minLon)
         assertEquals(expected = 3.0, actual = map.maxLat)
