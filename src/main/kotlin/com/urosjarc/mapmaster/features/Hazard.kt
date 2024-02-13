@@ -1,50 +1,54 @@
-			package com.urosjarc.mapmaster.features
-            import com.urosjarc.mapmaster.domain.* 
-            
-            /**
-             * This file is auto generated!
-             */
+package com.urosjarc.mapmaster.features
 
-            data class HazardNode(
-                val node: OsmNode,
-                val type: HazardType
-            )
+import com.urosjarc.mapmaster.domain.OsmFeature
+import com.urosjarc.mapmaster.domain.OsmNode
+import com.urosjarc.mapmaster.domain.OsmRel
+import com.urosjarc.mapmaster.domain.OsmWay
 
-            data class HazardWay(
-                val way: OsmWay,
-                val type: HazardType
-            )
+/**
+ * This file is auto generated!
+ */
 
-            data class HazardRel(
-                val rel: OsmRel,
-                val type: HazardType
-            )
+data class HazardNode(
+    val node: OsmNode,
+    val type: HazardType
+)
 
-            data class HazardFeatures(
-                val nodes: MutableList<HazardNode> = mutableListOf(),
-                val ways: MutableList<HazardWay> = mutableListOf(),
-                val rels: MutableList<HazardRel> = mutableListOf()
-            ) {
-                fun add(feature: OsmFeature) {
-                    val enumValue = feature.obj.tags["hazard"]
-                    val type = HazardType.entries.firstOrNull { it.value == enumValue }
-                        ?: HazardType.OTHER
-                    when (feature.objType) {
+data class HazardWay(
+    val way: OsmWay,
+    val type: HazardType
+)
 
-                        OsmFeature.Type.NODE ->
-                            this.nodes.add(HazardNode(node = feature.obj as OsmNode, type = type))
+data class HazardRel(
+    val rel: OsmRel,
+    val type: HazardType
+)
 
-                        OsmFeature.Type.RELATIONSHIP ->
-                            this.rels.add(HazardRel(rel = feature.obj as OsmRel, type = type))
+data class HazardFeatures(
+    val nodes: MutableList<HazardNode> = mutableListOf(),
+    val ways: MutableList<HazardWay> = mutableListOf(),
+    val rels: MutableList<HazardRel> = mutableListOf()
+) {
+    fun add(feature: OsmFeature) {
+        val enumValue = feature.obj.tags["hazard"]
+        val type = HazardType.entries.firstOrNull { it.value == enumValue }
+            ?: HazardType.OTHER
+        when (feature.objType) {
 
-                        OsmFeature.Type.WAY ->
-                            this.ways.add(HazardWay(way = feature.obj as OsmWay, type = type))
+            OsmFeature.Type.NODE ->
+                this.nodes.add(HazardNode(node = feature.obj as OsmNode, type = type))
 
-                    }
-                }
-            }
+            OsmFeature.Type.RELATIONSHIP ->
+                this.rels.add(HazardRel(rel = feature.obj as OsmRel, type = type))
 
-            enum class HazardType(val value: String) {
-                HAZARD("hazard"),                   // Indicates of the hazards.
-                OTHER("other")
-            }
+            OsmFeature.Type.WAY ->
+                this.ways.add(HazardWay(way = feature.obj as OsmWay, type = type))
+
+        }
+    }
+}
+
+enum class HazardType(val value: String) {
+    HAZARD("hazard"),                   // Indicates of the hazards.
+    OTHER("other")
+}

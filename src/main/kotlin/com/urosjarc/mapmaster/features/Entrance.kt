@@ -1,50 +1,54 @@
-			package com.urosjarc.mapmaster.features
-            import com.urosjarc.mapmaster.domain.* 
-            
-            /**
-             * This file is auto generated!
-             */
+package com.urosjarc.mapmaster.features
 
-            data class EntranceNode(
-                val node: OsmNode,
-                val type: EntranceType
-            )
+import com.urosjarc.mapmaster.domain.OsmFeature
+import com.urosjarc.mapmaster.domain.OsmNode
+import com.urosjarc.mapmaster.domain.OsmRel
+import com.urosjarc.mapmaster.domain.OsmWay
 
-            data class EntranceWay(
-                val way: OsmWay,
-                val type: EntranceType
-            )
+/**
+ * This file is auto generated!
+ */
 
-            data class EntranceRel(
-                val rel: OsmRel,
-                val type: EntranceType
-            )
+data class EntranceNode(
+    val node: OsmNode,
+    val type: EntranceType
+)
 
-            data class EntranceFeatures(
-                val nodes: MutableList<EntranceNode> = mutableListOf(),
-                val ways: MutableList<EntranceWay> = mutableListOf(),
-                val rels: MutableList<EntranceRel> = mutableListOf()
-            ) {
-                fun add(feature: OsmFeature) {
-                    val enumValue = feature.obj.tags["entrance"]
-                    val type = EntranceType.entries.firstOrNull { it.value == enumValue }
-                        ?: EntranceType.OTHER
-                    when (feature.objType) {
+data class EntranceWay(
+    val way: OsmWay,
+    val type: EntranceType
+)
 
-                        OsmFeature.Type.NODE ->
-                            this.nodes.add(EntranceNode(node = feature.obj as OsmNode, type = type))
+data class EntranceRel(
+    val rel: OsmRel,
+    val type: EntranceType
+)
 
-                        OsmFeature.Type.RELATIONSHIP ->
-                            this.rels.add(EntranceRel(rel = feature.obj as OsmRel, type = type))
+data class EntranceFeatures(
+    val nodes: MutableList<EntranceNode> = mutableListOf(),
+    val ways: MutableList<EntranceWay> = mutableListOf(),
+    val rels: MutableList<EntranceRel> = mutableListOf()
+) {
+    fun add(feature: OsmFeature) {
+        val enumValue = feature.obj.tags["entrance"]
+        val type = EntranceType.entries.firstOrNull { it.value == enumValue }
+            ?: EntranceType.OTHER
+        when (feature.objType) {
 
-                        OsmFeature.Type.WAY ->
-                            this.ways.add(EntranceWay(way = feature.obj as OsmWay, type = type))
+            OsmFeature.Type.NODE ->
+                this.nodes.add(EntranceNode(node = feature.obj as OsmNode, type = type))
 
-                    }
-                }
-            }
+            OsmFeature.Type.RELATIONSHIP ->
+                this.rels.add(EntranceRel(rel = feature.obj as OsmRel, type = type))
 
-            enum class EntranceType(val value: String) {
-                YES("yes"),                         // An entrance in a building. Replaces the deprecated tag building=entrance.
-                OTHER("other")
-            }
+            OsmFeature.Type.WAY ->
+                this.ways.add(EntranceWay(way = feature.obj as OsmWay, type = type))
+
+        }
+    }
+}
+
+enum class EntranceType(val value: String) {
+    YES("yes"),                         // An entrance in a building. Replaces the deprecated tag building=entrance.
+    OTHER("other")
+}

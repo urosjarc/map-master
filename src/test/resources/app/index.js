@@ -4,10 +4,10 @@ const streetname = document.getElementById('streetname')
 const start = document.getElementById('start')
 const end = document.getElementById('end')
 const startCordLat = document.getElementById('startCordLat')
-const startCordLon= document.getElementById('startCordLon')
+const startCordLon = document.getElementById('startCordLon')
 const endCordLat = document.getElementById('endCordLat')
-const endCordLon= document.getElementById('endCordLon')
-const navodila= document.getElementById('navodila')
+const endCordLon = document.getElementById('endCordLon')
+const navodila = document.getElementById('navodila')
 
 const polylines = [];
 const markers = [];
@@ -38,6 +38,36 @@ fetch("http://localhost:8080/lines").then(res => {
     })
 })
 
+index.on('click', function (e) {
+
+
+    const fillStart = start.innerHTML.length === 0
+    const fillEnd = end.innerHTML.length === 0
+
+    var coord = e.latlng;
+
+    if(!fillStart && !fillEnd){
+        clearMap()
+        const m = L.marker(coord).addTo(index);
+        markers.push(m)
+    }
+
+
+
+    fetch('http://localhost:8080/closestStreet?' + new URLSearchParams({
+        lat: coord.lat,
+        lon: coord.lng,
+    })).then(res => res.json().then(data => {
+        fillStartOrEnd([data.match])
+        if(!fillStart){
+            endSelected()
+            searchBestRoute()
+        } else {
+            startSelected()
+        }
+    }))
+})
+
 function clearStart() {
     start.innerHTML = ''
 }
@@ -46,10 +76,13 @@ function clearEnd() {
     end.innerHTML = ''
 }
 
-function clearMap(){
+function clearMap() {
     polylines.forEach(item => index.removeLayer(item))
     markers.forEach(item => index.removeLayer(item))
     navodila.innerHTML = ""
+    clearEnd()
+    clearStart()
+    streetname.value = ""
 }
 
 function endSelected() {
@@ -83,22 +116,28 @@ function drawLocation(name, cb) {
 function searchStreetName() {
     fetch('http://localhost:8080/streets?' + new URLSearchParams({
         query: streetname.value
-    })).then(res => {
-        res.json().then(data => {
-            const fillStart = start.innerHTML.length === 0
-            const fillEnd = end.innerHTML.length === 0
-            for (name of data) {
-                const option = document.createElement("option")
-                const option2 = document.createElement("option")
-                option.value = index
-                option.innerHTML = name
-                option2.value = index
-                option2.innerHTML = name
-                if (fillStart) start.appendChild(option)
-                else if (fillEnd) end.appendChild(option2)
-            }
-        })
-    })
+    })).then(res => res.json().then(data => {
+        fillStartOrEnd(data)
+    }))
+}
+
+function fillStartOrEnd(data){
+    const fillStart = start.innerHTML.length === 0
+    const fillEnd = end.innerHTML.length === 0
+    for (name of data) {
+        const option = document.createElement("option")
+        const option2 = document.createElement("option")
+        option.value = index
+        option.innerHTML = name
+        option2.value = index
+        option2.innerHTML = name
+        if (fillStart) {
+            start.appendChild(option)
+        }
+        else if (fillEnd) {
+            end.appendChild(option2)
+        }
+    }
 }
 
 function searchBestRoute() {
@@ -112,8 +151,8 @@ function searchBestRoute() {
 
             navodila.innerHTML = ""
             let count = 0
-            for(point of data){
-                if(point.description != null){
+            for (point of data) {
+                if (point.description != null) {
                     const desc = `${++count}. ${point.description}`
                     const m = L.marker(point, {title: desc}).addTo(index);
                     markers.push(m)

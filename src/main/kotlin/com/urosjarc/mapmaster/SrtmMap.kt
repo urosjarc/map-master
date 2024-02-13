@@ -1,5 +1,6 @@
-package com.urosjarc.mapmaster.domain
+package com.urosjarc.mapmaster
 
+import com.urosjarc.mapmaster.domain.MapVector
 import com.urosjarc.mapmaster.exceptions.SrtmException
 import java.nio.ShortBuffer
 

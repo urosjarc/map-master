@@ -7,10 +7,17 @@ plugins {
     `jvm-test-suite`
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "com.urosjarc"
 version = "0.0.1-SNAPSHOT"
+
+
+application {
+    mainClass = "com.urosjarc.mapmaster.MapVisualizer"
+}
+
 
 repositories {
     mavenCentral()
@@ -27,6 +34,7 @@ dependencies {
     this.testImplementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
     this.testImplementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
     this.testImplementation("io.ktor:ktor-server-cors:$ktor_version")
+    this.testImplementation("io.ktor:ktor-server-call-logging:$ktor_version")
     this.testImplementation("org.jetbrains.kotlin:kotlin-test")
     this.testImplementation("org.apache.logging.log4j:log4j-core:2.20.0")
     this.testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:2.20.0")

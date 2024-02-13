@@ -1,50 +1,54 @@
-			package com.urosjarc.mapmaster.features
-            import com.urosjarc.mapmaster.domain.* 
-            
-            /**
-             * This file is auto generated!
-             */
+package com.urosjarc.mapmaster.features
 
-            data class MaxwidthNode(
-                val node: OsmNode,
-                val type: MaxwidthType
-            )
+import com.urosjarc.mapmaster.domain.OsmFeature
+import com.urosjarc.mapmaster.domain.OsmNode
+import com.urosjarc.mapmaster.domain.OsmRel
+import com.urosjarc.mapmaster.domain.OsmWay
 
-            data class MaxwidthWay(
-                val way: OsmWay,
-                val type: MaxwidthType
-            )
+/**
+ * This file is auto generated!
+ */
 
-            data class MaxwidthRel(
-                val rel: OsmRel,
-                val type: MaxwidthType
-            )
+data class MaxwidthNode(
+    val node: OsmNode,
+    val type: MaxwidthType
+)
 
-            data class MaxwidthFeatures(
-                val nodes: MutableList<MaxwidthNode> = mutableListOf(),
-                val ways: MutableList<MaxwidthWay> = mutableListOf(),
-                val rels: MutableList<MaxwidthRel> = mutableListOf()
-            ) {
-                fun add(feature: OsmFeature) {
-                    val enumValue = feature.obj.tags["maxwidth"]
-                    val type = MaxwidthType.entries.firstOrNull { it.value == enumValue }
-                        ?: MaxwidthType.OTHER
-                    when (feature.objType) {
+data class MaxwidthWay(
+    val way: OsmWay,
+    val type: MaxwidthType
+)
 
-                        OsmFeature.Type.NODE ->
-                            this.nodes.add(MaxwidthNode(node = feature.obj as OsmNode, type = type))
+data class MaxwidthRel(
+    val rel: OsmRel,
+    val type: MaxwidthType
+)
 
-                        OsmFeature.Type.RELATIONSHIP ->
-                            this.rels.add(MaxwidthRel(rel = feature.obj as OsmRel, type = type))
+data class MaxwidthFeatures(
+    val nodes: MutableList<MaxwidthNode> = mutableListOf(),
+    val ways: MutableList<MaxwidthWay> = mutableListOf(),
+    val rels: MutableList<MaxwidthRel> = mutableListOf()
+) {
+    fun add(feature: OsmFeature) {
+        val enumValue = feature.obj.tags["maxwidth"]
+        val type = MaxwidthType.entries.firstOrNull { it.value == enumValue }
+            ?: MaxwidthType.OTHER
+        when (feature.objType) {
 
-                        OsmFeature.Type.WAY ->
-                            this.ways.add(MaxwidthWay(way = feature.obj as OsmWay, type = type))
+            OsmFeature.Type.NODE ->
+                this.nodes.add(MaxwidthNode(node = feature.obj as OsmNode, type = type))
 
-                    }
-                }
-            }
+            OsmFeature.Type.RELATIONSHIP ->
+                this.rels.add(MaxwidthRel(rel = feature.obj as OsmRel, type = type))
 
-            enum class MaxwidthType(val value: String) {
-                WIDTH("Width"),                     // Width limit – units other than metres should be explicit
-                OTHER("other")
-            }
+            OsmFeature.Type.WAY ->
+                this.ways.add(MaxwidthWay(way = feature.obj as OsmWay, type = type))
+
+        }
+    }
+}
+
+enum class MaxwidthType(val value: String) {
+    WIDTH("Width"),                     // Width limit – units other than metres should be explicit
+    OTHER("other")
+}

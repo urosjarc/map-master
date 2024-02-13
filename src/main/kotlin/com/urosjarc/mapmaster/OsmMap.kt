@@ -1,6 +1,6 @@
-package com.urosjarc.mapmaster.domain
+package com.urosjarc.mapmaster
 
-import com.urosjarc.mapmaster.Utils
+import com.urosjarc.mapmaster.domain.*
 import com.urosjarc.mapmaster.exceptions.OsmException
 import com.urosjarc.mapmaster.rules.CyclewayTypeSuitability
 import com.urosjarc.mapmaster.rules.FootwayTypeSuitability
@@ -17,7 +17,7 @@ data class OsmMap(
 
     val features = OsmFeatures()
     private val street_to_feature = mutableMapOf<String, MutableList<OsmFeature>>()
-    private val position_to_street = mutableMapOf<MapVector, OsmNode>()
+    private val position_to_feature = mutableMapOf<MapVector, OsmFeature>()
 
     fun add(feature: OsmFeature): Boolean {
         val street = feature.obj.street
@@ -28,15 +28,13 @@ data class OsmMap(
             this.street_to_feature
                 .getOrPut(feature.obj.address!!, ::mutableListOf)
                 .add(feature)
-        }
 
-        // Add position mapping
-        if (feature.objType == OsmFeature.Type.NODE) {
-            val node = feature.obj as OsmNode
-            if (street != null && houseNumber != null) {
-                this.position_to_street[node.position] = node
+            // Add position mapping
+            if (houseNumber != null) {
+                this.position_to_feature[feature.obj.position] = feature
             }
         }
+
 
         return this.features.add(feature = feature)
     }
@@ -77,9 +75,9 @@ data class OsmMap(
 
     fun searchClosestStreets(position: MapVector, radius: Float = 100f): List<MapMatch> {
         val matches = mutableListOf<MapMatch>()
-        this.position_to_street.forEach { (pos, node) ->
+        this.position_to_feature.forEach { (pos, feature) ->
             val distance = position.distance(vector = pos)
-            val address = node.address
+            val address = feature.obj.address
             if (distance < radius && address != null) {
                 matches.add(MapMatch(match = address, distance = distance))
             }
@@ -129,12 +127,11 @@ data class OsmMap(
                 description += """ ${angle.toInt()}deg to the """
                 description += if (turnAngle < 0) "left" else "right"
                 if (curName != preName) {
+                    val type = curNode.parents.first().tags["highway"]
                     if (curName == null)
-                        description += " onto unknown street"
+                        description += " onto $type street"
                     else {
-                        val surface = curNode.parents.first().tags["surface"]
-                        val type = curNode.parents.first().tags["highway"]
-                        description += " onto '$curName' street (type: $type, surface: $surface)"
+                        description += " onto $type street '$curName'"
                     }
                 }
 

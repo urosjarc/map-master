@@ -1,5 +1,6 @@
 package com.urosjarc.mapmaster
 
+import org.apache.logging.log4j.kotlin.logger
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
@@ -13,7 +14,7 @@ object GenerateFeatures {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        val url = GenerateFeatures::class.java.getResource("/map-features.html") ?: throw Exception("Could not read resource!")
+        val url = GenerateFeatures::class.java.getResource("/features/osm-features.html") ?: throw Exception("Could not read resource!")
         val doc: Document = Jsoup.parse(File(url.path))
         val classes = mutableMapOf<String, MutableList<ClassEnumInfo>>()
         for (tr in doc.select("tr")) {

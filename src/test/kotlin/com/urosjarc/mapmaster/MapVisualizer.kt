@@ -1,23 +1,23 @@
 package com.urosjarc.mapmaster
 
-import com.urosjarc.mapmaster.domain.MapMatch
-import com.urosjarc.mapmaster.domain.OsmRouteNode
-import com.urosjarc.mapmaster.domain.OsmSuitability
-import com.urosjarc.mapmaster.domain.OsmVehicle
+import com.urosjarc.mapmaster.domain.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import org.slf4j.event.Level
 
 class MapVisualizer {
     companion object {
@@ -45,6 +45,15 @@ class MapVisualizer {
                     this.allowMethod(HttpMethod.Get)
                     this.allowMethod(HttpMethod.Delete)
                 }
+                this.install(CallLogging) {
+                    this.level = Level.DEBUG
+                    format { call ->
+                        val status = call.response.status()
+                        val httpMethod = call.request.httpMethod.value
+                        val userAgent = call.request.headers["User-Agent"]
+                        "Status: $status, HTTP method: $httpMethod, User agent: $userAgent"
+                    }
+                }
 
                 routing {
                     staticResources("/", "app") {
@@ -71,6 +80,23 @@ class MapVisualizer {
                         val features = map.getStreetFeatures(name = name)
                         val ele = features!!.first().obj
                         call.respond(ele.position.toMap())
+                    }
+                    get("/closestStreet") {
+                        val match: MapMatch = map.searchClosestStreets(
+                            position = MapVector(
+                                lat = this.call.request.queryParameters["lat"]!!.toDouble(),
+                                lon = this.call.request.queryParameters["lon"]!!.toDouble()
+                            ),
+                            radius = 1000f
+                        ).first()
+                        call.respond(
+                            JsonObject(
+                                mapOf(
+                                    "match" to JsonPrimitive(match.match),
+                                    "distance" to JsonPrimitive(match.distance),
+                                )
+                            )
+                        )
                     }
                     get("/route") {
                         val start = this.call.request.queryParameters["start"]!!
