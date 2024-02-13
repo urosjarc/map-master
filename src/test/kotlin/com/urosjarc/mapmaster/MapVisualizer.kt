@@ -101,13 +101,40 @@ class MapVisualizer {
                     get("/route") {
                         val start = this.call.request.queryParameters["start"]!!
                         val end = this.call.request.queryParameters["end"]!!
+                        val vehicle = this.call.request.queryParameters["vehicle"]!!
+                        val suitability = this.call.request.queryParameters["suitability"]!!
+
+                        val vehicleInfo = when (vehicle) {
+                            "BODY" -> OsmVehicle.BODY
+                            "HORSE" -> OsmVehicle.HORSE
+                            "BICYCLE" -> OsmVehicle.BICYCLE
+                            "MOPED" -> OsmVehicle.MOPED
+                            "MOTORCYCLE" -> OsmVehicle.MOTORCYCLE
+                            "CAR" -> OsmVehicle.CAR
+                            "BUS" -> OsmVehicle.BUS
+                            "TRACTOR" -> OsmVehicle.TRACTOR
+                            "TRAIN" -> OsmVehicle.TRAIN
+                            else -> throw Exception("Not exists!")
+                        }
+
+                        val suitabilityEnum = when (suitability) {
+                            "IMPOSIBLE" -> OsmSuitability.IMPOSIBLE
+                            "CATASTROFIC" -> OsmSuitability.CATASTROFIC
+                            "BAD" -> OsmSuitability.BAD
+                            "NEUTRAL" -> OsmSuitability.NEUTRAL
+                            "GOOD" -> OsmSuitability.GOOD
+                            "EXCELENT" -> OsmSuitability.EXCELENT
+                            else -> throw Exception("Not exists!")
+                        }
+
                         val startPos = map.getStreetFeatures(name = start)!!.first().obj.position
                         val endPos = map.getStreetFeatures(name = end)!!.first().obj.position
+
                         val routeNodes: List<OsmRouteNode> = map.searchShortestTransitWay(
                             start = startPos,
                             finish = endPos,
-                            vehicle = OsmVehicle.BODY,
-                            suitability = OsmSuitability.CATASTROFIC
+                            vehicle = vehicleInfo,
+                            suitability = suitabilityEnum
                         )
 
                         val routeNodeJson = routeNodes.map {

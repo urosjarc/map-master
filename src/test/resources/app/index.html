@@ -19,7 +19,7 @@
 
         button {
             display: inline-block;
-            width: 150px;
+            width: 200px;
         }
     </style>
 </head>
@@ -47,7 +47,31 @@
     <button onclick="clearEnd()">Clear</button>
     <input id="endCordLat"/>
     <input id="endCordLon"/>
+
     <br>
+    <label>Vehicle:</label>
+
+    <select id="vehicle">
+        <option value="BODY">Body</option>
+        <option value="HORSE">Horse</option>
+        <option value="BICYCLE">Bicycle</option>
+        <option value="MOPED">Moped</option>
+        <option value="MOTORCYCLE">Motorcycle</option>
+        <option value="CAR">Car</option>
+        <option value="BUS">Bus</option>
+        <option value="TRACTOR">Tractor</option>
+        <option value="TRAIN">Train</option>
+    </select>
+    <label style="width: 230px">Accepted travel suitability:</label>
+    <select style="width: 378px" id="suitability">
+        <option value="IMPOSIBLE">Imposible</option>
+        <option value="CATASTROFIC">Catastrofic</option>
+        <option value="BAD">Bad</option>
+        <option value="NEUTRAL">Neutral</option>
+        <option value="GOOD">Good</option>
+        <option value="EXCELENT">Excelent</option>
+    </select>
+
 </div>
 
 <table id="navodila" style="float: right; min-width: 200px"></table>

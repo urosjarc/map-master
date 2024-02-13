@@ -8,6 +8,8 @@ const startCordLon = document.getElementById('startCordLon')
 const endCordLat = document.getElementById('endCordLat')
 const endCordLon = document.getElementById('endCordLon')
 const navodila = document.getElementById('navodila')
+const vehicle = document.getElementById("vehicle")
+const suitability = document.getElementById("suitability")
 
 const polylines = [];
 const markers = [];
@@ -30,7 +32,7 @@ var target = L.latLng(46.038646, 14.505751);
 index.setView(target, 16);
 
 // Place line on the map
-fetch("http://localhost:8080/lines").then(res => {
+fetch("/lines").then(res => {
     res.json().then(lines => {
         for (line of lines) {
             L.polyline(line, {weight: 1, color: 'blue'}).addTo(index)
@@ -54,7 +56,7 @@ index.on('click', function (e) {
 
 
 
-    fetch('http://localhost:8080/closestStreet?' + new URLSearchParams({
+    fetch('/closestStreet?' + new URLSearchParams({
         lat: coord.lat,
         lon: coord.lng,
     })).then(res => res.json().then(data => {
@@ -102,7 +104,7 @@ function startSelected() {
 }
 
 function drawLocation(name, cb) {
-    fetch('http://localhost:8080/street?' + new URLSearchParams({
+    fetch('/street?' + new URLSearchParams({
         name: name
     })).then(res => {
         res.json().then(data => {
@@ -114,7 +116,7 @@ function drawLocation(name, cb) {
 }
 
 function searchStreetName() {
-    fetch('http://localhost:8080/streets?' + new URLSearchParams({
+    fetch('/streets?' + new URLSearchParams({
         query: streetname.value
     })).then(res => res.json().then(data => {
         fillStartOrEnd(data)
@@ -141,9 +143,11 @@ function fillStartOrEnd(data){
 }
 
 function searchBestRoute() {
-    fetch('http://localhost:8080/route?' + new URLSearchParams({
+    fetch('/route?' + new URLSearchParams({
         start: start.options[start.selectedIndex].text,
-        end: end.options[end.selectedIndex].text
+        end: end.options[end.selectedIndex].text,
+        vehicle: vehicle.value,
+        suitability: suitability.value
     })).then(res => {
         res.json().then(data => {
             const line = L.polyline(data, {weight: 3, color: 'red'}).addTo(index)
