@@ -6,8 +6,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 data class MapPosition(
-    val lat: Double,
-    val lon: Double,
+    var lat: Double,
+    var lon: Double,
 ) {
     fun toMap(): Map<String, Double> = mapOf(
         this::lat.name to this.lat,
@@ -15,7 +15,7 @@ data class MapPosition(
     )
 
     fun distance(position: MapPosition): Double {
-        val dLat = (position.lat - this.lat).absoluteValue
-        return acos(sin(position.lat) * sin(this.lat) + cos(position.lat) * cos(this.lat) * cos(dLat)) * 6_371_001
+        val dLat = position.lat - this.lat
+        return (acos(sin(position.lat) * sin(this.lat) + cos(position.lat) * cos(this.lat) * cos(dLat)) * 6_371_001).absoluteValue
     }
 }

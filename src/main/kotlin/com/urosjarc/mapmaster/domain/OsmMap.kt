@@ -97,53 +97,60 @@ data class OsmMap(
 
     fun searchShortestTransitWay(
         start: MapPosition,
-        end: MapPosition,
+        finish: MapPosition,
         vehicle: OsmVehicle,
         suitability: OsmSuitability
     ): MutableList<OsmNode> {
 
         //Get search space
-        val ways = this.getTransitWays(vehicle = vehicle, suitability = suitability).toMutableList()
+        val nodes = this.getTransitWays(vehicle = vehicle, suitability = suitability).flatMap { it.nodes }
 
         //Get starting and end node
-        var startNode: OsmNode = ways[0].nodes[0]
-        var endNode: OsmNode = startNode
+        var startNode: OsmNode = nodes[0]
+        var finishNode: OsmNode = startNode
 
         var minStartDist = Double.MAX_VALUE
-        var minEndDist = Double.MAX_VALUE
+        var minFinishDist = Double.MAX_VALUE
+
+        //Cost of cheepest path
+        val gScore = mutableMapOf<OsmNode, Double>()
+        val fScore = mutableMapOf<OsmNode, Double>()
 
         //Search travel space for closest end and start node
         var numNodes = 0
-        ways.forEach { way ->
-            way.nodes.forEach { node ->
-                numNodes++
-                val toStartDist = start.distance(position = node.position)
-                val toEndDist = end.distance(position = node.position)
-                if (toStartDist < minStartDist) {
-                    startNode = node
-                    minStartDist = toStartDist
-                }
-                if (toEndDist < minEndDist) {
-                    endNode = node
-                    minEndDist = toEndDist
-                }
+        nodes.forEach { node ->
+            gScore[node] = Double.POSITIVE_INFINITY
+            fScore[node] = Double.POSITIVE_INFINITY
+
+            numNodes++
+            val toStartDist = start.distance(position = node.position)
+            val toFinishDist = finish.distance(position = node.position)
+            if (toStartDist < minStartDist) {
+                startNode = node
+                minStartDist = toStartDist
+            }
+            if (toFinishDist < minFinishDist) {
+                finishNode = node
+                minFinishDist = toFinishDist
             }
         }
 
         //Cost of cheepest path
-        val gScore = mutableMapOf(startNode to 0.0)
-        val fScore = mutableMapOf(startNode to this.costEstimation(start = startNode, end = endNode, vehicle = vehicle))
+        gScore[startNode] = 0.0
+        fScore[startNode] = this.costEstimation(start = startNode, end = finishNode, vehicle = vehicle)
 
         //Weighted A* algorithm
         val discoveredNodes = PriorityQueue<OsmNode>(numNodes, compareBy { fScore[it]!! })
         val cameFrom = mutableMapOf<OsmNode, OsmNode>()
 
+        //Start discovering node
+        discoveredNodes.add(startNode)
 
         //Traverse search space
-        while (ways.isNotEmpty()) {
+        while (discoveredNodes.isNotEmpty()) {
             var current = discoveredNodes.remove()
             //If found end node backtrace the solution
-            if (current == endNode) {
+            if (current == finishNode) {
                 val route = mutableListOf(current)
                 while (cameFrom.contains(key = current)) {
                     current = cameFrom[current]
@@ -153,12 +160,11 @@ data class OsmMap(
             }
 
             current.siblings.forEach { sibling ->
-                val siblingsGScore = gScore[current]!!
-                val tentativeScore = siblingsGScore + vehicle.cost(start = current, end = sibling)
-                if (tentativeScore < siblingsGScore) {
+                val tentativeScore = gScore.getOrPut(current) { Double.POSITIVE_INFINITY } + vehicle.cost(start = current, end = sibling)
+                if (tentativeScore < gScore.getOrPut(sibling) { Double.POSITIVE_INFINITY }) {
                     cameFrom[sibling] = current
                     gScore[sibling] = tentativeScore
-                    fScore[sibling] = tentativeScore + this.costEstimation(start = startNode, end = endNode, vehicle = vehicle)
+                    fScore[sibling] = tentativeScore + this.costEstimation(start = startNode, end = finishNode, vehicle = vehicle)
                     if (!discoveredNodes.contains(sibling)) {
                         discoveredNodes.add(sibling)
                     }

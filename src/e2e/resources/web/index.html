@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        select {width: 200px;}
+        input {width: 193px;}
+        label {
+            display: inline-block;
+            width: 80px;
+        }
+        button {
+            display: inline-block;
+            width: 150px;
+        }
+    </style>
 </head>
 <body>
 
@@ -10,18 +22,25 @@
 <link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
 <div>
     <label>Search:</label>
-    <input  id="streetname" autoComplete="on"/>
+    <input id="streetname" autoComplete="on"/>
     <button onclick="searchStreetName()">Search</button>
+    <button onclick="searchBestRoute()">Weighted A* search</button>
+    <button onclick="clearMap()">Clear</button>
 
     <br>
     <label>Start:</label>
-    <select id="start"></select>
+    <select onchange="startSelected()"  id="start"></select>
     <button onclick="clearStart()">Clear</button>
+    <input id="startCordLat"/>
+    <input id="startCordLon"/>
 
     <br>
     <label>End:</label>
-    <select id="end"></select>
+    <select onchange="endSelected()" id="end"></select>
     <button onclick="clearEnd()">Clear</button>
+    <input id="endCordLat"/>
+    <input id="endCordLon"/>
+    <br>
 </div>
 
 <div id="osm-map"></div>

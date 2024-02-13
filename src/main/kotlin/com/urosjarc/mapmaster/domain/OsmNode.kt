@@ -3,7 +3,7 @@ package com.urosjarc.mapmaster.domain
 class OsmNode(
     override val id: Long,
     override val tags: MutableMap<String, String> = mutableMapOf(),
-    val position: MapPosition,
+    override val position: MapPosition,
     val elevation: Float? = null,
     val parents: MutableSet<OsmWay> = mutableSetOf(),
     val siblings: MutableSet<OsmNode> = mutableSetOf(),
@@ -12,6 +12,10 @@ class OsmNode(
     fun connect(node: OsmNode) {
         this.siblings.add(node)
         node.siblings.add(this)
+    }
+
+    override fun toString(): String {
+        return "Node(id=$id)"
     }
 
     override fun hashCode(): Int = this.id.hashCode()

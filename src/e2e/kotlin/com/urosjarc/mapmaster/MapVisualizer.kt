@@ -52,6 +52,27 @@ fun main() {
                 val streets: List<MapMatch> = map.searchStreet(query = query)
                 call.respond(streets.map { it.match }.toList())
             }
+            get("/street") {
+                val name = this.call.request.queryParameters["name"]!!
+                println(name)
+                val features = map.getStreetFeatures(name = name)
+                val ele = features!!.first().obj
+                call.respond(ele.position.toMap())
+            }
+            get("/route") {
+                val start = this.call.request.queryParameters["start"]!!
+                val end = this.call.request.queryParameters["end"]!!
+                val startPos = map.getStreetFeatures(name = start)!!.first().obj.position
+                val endPos = map.getStreetFeatures(name = end)!!.first().obj.position
+                val nodes = map.searchShortestTransitWay(
+                    start = startPos,
+                    finish = endPos,
+                    vehicle = OsmVehicle.BODY,
+                    suitability = OsmSuitability.CATASTROFIC
+                )
+
+                call.respond(nodes.map { it.position.toMap() })
+            }
         }
     }.start(wait = true)
 }
